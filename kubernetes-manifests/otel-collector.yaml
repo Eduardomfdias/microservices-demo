@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: collector-gateway-config
+  namespace: default
+data:
+  collector-gateway-config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+    processors:
+      batch:
+    exporters:
+      otlp/jaeger:
+        endpoint: jaeger:4317
+        tls:
+          insecure: true
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [otlp/jaeger]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opentelemetrycollector
+  namespace: default
+  labels:
+    app: opentelemetrycollector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opentelemetrycollector
+  template:
+    metadata:
+      labels:
+        app: opentelemetrycollector
+    spec:
+      containers:
+        - name: otel-gateway
+          image: otel/opentelemetry-collector-contrib:0.144.0
+          args:
+            - --config=/conf/collector-gateway-config.yaml
+          ports:
+            - containerPort: 4317
+            - containerPort: 4318
+          volumeMounts:
+            - name: collector-config
+              mountPath: /conf
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+      volumes:
+        - name: collector-config
+          configMap:
+            name: collector-gateway-config
+            items:
+              - key: collector-gateway-config.yaml
+                path: collector-gateway-config.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opentelemetrycollector
+  namespace: default
+spec:
+  selector:
+    app: opentelemetrycollector
+  ports:
+    - name: grpc-otlp
+      port: 4317
+      targetPort: 4317
+      protocol: TCP
+    - name: http-otlp
+      port: 4318
+      targetPort: 4318
+      protocol: TCP
+  type: ClusterIP

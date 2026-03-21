@@ -26,3 +26,7 @@ obj/
 pkg/
 release/wi-kubernetes-manifests.yaml
 vendor/
+
+# Resultados de experimentos (gerados pelos scripts de carga)
+resultados_*/
+cenarios_ob_*/
