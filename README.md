@@ -115,58 +115,77 @@ O trace do **W3** é o mais completo — propaga por ~8 serviços e mostra a cad
 
 ## Testes de carga
 
-### Script incremental (`experimentos_escalamento.sh`)
+### Script principal (`c1.sh`) — Cenário C1
 
-Incrementa 1 utilizador virtual por step até o sistema quebrar (critérios: p99 > 2000 ms ou taxa de falhas > 5%).
+Script de testes de carga com **3 perfis de utilizador** de comportamento natural (timings diferenciados) e spawn gradual.
 
 ```bash
-# Modo recomendado
-./experimentos_escalamento.sh incremental
+# Dar permissão de execução (só é preciso fazer uma vez)
+chmod +x c1.sh
+
+# Demo rápida (10 users, 2 min) — para validar que tudo está OK
+NAMESPACE=default ./c1.sh demo
+
+# Cenário C1 — escada incremental até quebra (5 → 50 users)
+NAMESPACE=default ./c1.sh incremental
 
 # Com parâmetros customizados
-MAX_USERS=80 STEP_DURATION=90 P99_THRESHOLD=3000 ./experimentos_escalamento.sh incremental
+MAX_USERS=80 STEP_DURATION=90 SPAWN_RATE=3 NAMESPACE=default ./c1.sh incremental
 ```
 
-**Variáveis:**
+**Modos disponíveis:**
+
+| Modo | Descrição |
+|---|---|
+| `demo` | Run único de validação (10 users, 2 min) |
+| `incremental` | Escada 5 → MAX_USERS até o sistema quebrar (Cenário C1) |
+| `baseline` | Captura estado inicial do cluster |
+| `pause_lg` | Pausa o loadgenerator nativo do cluster |
+| `resume_lg` | Retoma o loadgenerator nativo |
+| `report` | Gera resumo de resultados já existentes |
+
+**Variáveis de ambiente:**
 
 | Variável | Default | Descrição |
 |---|---|---|
-| `MAX_USERS` | 60 | Limite máximo de utilizadores |
-| `STEP_DURATION` | 60 | Segundos de carga por step |
-| `P99_THRESHOLD` | 2000 | ms de p99 para considerar quebra |
-| `FAIL_THRESHOLD` | 5 | % de falhas para considerar quebra |
-| `COOLDOWN` | 15 | Segundos entre steps |
+| `NAMESPACE` | `default` | Namespace Kubernetes |
+| `MAX_USERS` | `50` | Limite máximo de utilizadores (modo incremental) |
+| `STEP_DURATION` | `60` | Segundos de carga por step |
+| `SPAWN_RATE` | `2` | Utilizadores lançados por segundo (entrada gradual) |
+| `P99_THRESHOLD` | `2000` | ms de p99 para considerar quebra |
+| `FAIL_THRESHOLD` | `5` | % de falhas para considerar quebra |
+| `COOLDOWN` | `15` | Segundos de cooldown entre steps |
 
-**Outputs** em `resultados_YYYYMMDD_HHMMSS/`:
+**Outputs** em `cenarios_ob_YYYYMMDD_HHMMSS/`:
 ```
 baseline/                    # estado do cluster antes dos testes
 step_Nusers/                 # métricas Locust por step (CSV + HTML)
-monitoring/pods_metrics.csv  # séries temporais de CPU/RAM
-RESUMO_EXPERIMENTOS.txt      # relatório consolidado
+monitoring/pods_metrics.csv  # séries temporais de CPU/pod
+progresso_incremental.csv    # tabela consolidada com todos os steps
+RESUMO.txt                   # relatório final
+run.log                      # log completo da execução
 ```
 
-### Script de cenários (`test1.sh`)
+### Perfis de utilizador (simulação realista)
 
-Versão compatível com GKE e Docker Desktop. Suporta modo `demo` (validação rápida do ciclo completo) e modo `incremental`.
-
-```bash
-# Docker Desktop
-NAMESPACE=default DISABLE_LG=false ./test1.sh demo
-
-# GKE
-HOST_IP=34.x.x.x NAMESPACE=ob ./test1.sh incremental
-```
-
-### Distribuição de tarefas Locust
-
-| Tarefa | Peso | ~Freq | Serviços envolvidos |
+| Perfil | Peso | Wait time | Comportamento |
 |---|---|---|---|
-| Browse product | 10 | 43% | frontend, productcatalogservice, currencyservice, adservice |
-| Homepage | 5 | 22% | frontend, productcatalogservice, recommendationservice, currencyservice |
-| Add to cart | 3 | 13% | frontend, cartservice |
-| View cart | 2 | 9% | frontend, cartservice |
-| Set currency | 2 | 9% | frontend, currencyservice |
-| Checkout | 1 | 4% | todos |
+| `CasualUser` | 30 % | 5–15 s | Navega devagar, raramente compra |
+| `NormalUser` | 50 % | 2–6 s | Ritmo médio, checkout ocasional |
+| `PowerUser` | 20 % | 0,5–2 s | Age rapidamente, vai direto ao checkout |
+
+### Resultados — Execução de referência (2026-03-22)
+
+| Users | p50 | p90 | p99 | Falhas | RPS | Estado |
+| --- | --- | --- | --- | --- | --- | --- |
+| 5 | 25 ms | 36 ms | 130 ms | 0 | 1,71 | ✅ OK |
+| 10 | 21 ms | 36 ms | 77 ms | 0 | 3,41 | ✅ OK |
+| 15 | 22 ms | 35 ms | 120 ms | 0 | 4,98 | ✅ OK |
+| 20 | 26 ms | 120 ms | 410 ms | 0 | 6,60 | ✅ OK |
+| 25 | 21 ms | 65 ms | 420 ms | 0 | 8,35 | ✅ OK |
+| **30** | **13 ms** | **210 ms** | **910 ms** | **247 (47,6 %)** | **8,79** | 🔴 QUEBRA |
+
+**Ponto de quebra:** 30 utilizadores — `QUEBRA_FALHAS(47.6%)`. Gargalo nos serviços `frontend`, `cartservice` e `productcatalogservice`.
 
 ---
 

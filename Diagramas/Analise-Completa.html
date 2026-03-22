@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Análise Completa — Online Boutique Microservices</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({startOnLoad:true, theme:'base', themeVariables:{fontSize:'12px'}});</script>
+  <style>
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size:15px; line-height:1.7; color:#333; background:#fff; max-width:960px; margin:0 auto; padding:2em; }
+    h1 { font-size:1.8em; font-weight:700; border-bottom:3px solid #1565C0; padding-bottom:.3em; color:#0D1B4B; margin-top:2em; }
+    h2 { font-size:1.25em; font-weight:600; color:#1565C0; margin-top:1.6em; border-left:4px solid #1565C0; padding-left:.6em; }
+    h3 { font-size:1.05em; font-weight:600; color:#283593; margin-top:1.2em; }
+    p  { margin:.6em 0 1em 0; }
+    blockquote { background:#F3F4F6; border-left:4px solid #90A4AE; padding:.7em 1.2em; margin:1em 0; border-radius:4px; color:#444; }
+    hr { border:none; border-top:2px solid #E0E0E0; margin:2.5em 0; }
+    .badge { display:inline-block; padding:.15em .55em; border-radius:3px; font-size:.8em; font-weight:600; margin:.1em; }
+    .go   { background:#00BCD4; color:#fff; }
+    .java { background:#FF7043; color:#fff; }
+    .node { background:#66BB6A; color:#fff; }
+    .py   { background:#5C6BC0; color:#fff; }
+    .cs   { background:#AB47BC; color:#fff; }
+    table { border-collapse:collapse; width:100%; margin:1em 0 1.5em 0; font-size:.92em; }
+    th { background:#1565C0; color:#fff; padding:7px 11px; text-align:left; }
+    td { border:1px solid #DDD; padding:6px 11px; vertical-align:top; }
+    tr:nth-child(even) { background:#F5F7FF; }
+    .mermaid { margin:1em 0 1.5em 0; background:#FAFAFA; border:1px solid #E0E0E0; border-radius:6px; padding:.8em; max-width:100%; overflow:auto; }
+    .toc { background:#EEF2FF; border:1px solid #C5CAE9; border-radius:6px; padding:1em 1.5em; margin-bottom:2em; }
+    .toc a { color:#3949AB; text-decoration:none; }
+    .toc a:hover { text-decoration:underline; }
+    .critical { color:#C62828; font-weight:700; }
+    .note { background:#FFF9C4; border-left:4px solid #F9A825; padding:.6em 1em; border-radius:4px; margin:1em 0; font-size:.92em; }
+    .info { background:#E3F2FD; border-left:4px solid #1565C0; padding:.6em 1em; border-radius:4px; margin:1em 0; font-size:.92em; }
+    pre { background:#F5F5F5; padding:.9em 1.1em; border-radius:4px; font-size:.88em; overflow-x:auto; margin:.5em 0 1em 0; }
+    code { background:#F0F0F0; padding:.1em .35em; border-radius:3px; font-size:.9em; }
+  </style>
+</head>
+<body>
+
+<h1 style="border-bottom:4px solid #1565C0; font-size:2em;">Análise Completa — Online Boutique Microservices</h1>
+<blockquote>
+  <strong>Projeto:</strong> Google Microservices Demo (Online Boutique) — aplicação de e-commerce distribuída<br>
+  <strong>Tecnologias:</strong> Go · C# · Node.js · Python · Java · Kubernetes · Docker · gRPC · Redis<br>
+  <strong>Objetivo:</strong> Análise técnica completa para trabalho prático de Arquiteturas Distribuídas
+</blockquote>
+
+<div class="toc">
+  <strong>Índice</strong>
+  <ol>
+    <li><a href="#arq">Arquitetura dos Microserviços</a></li>
+    <li><a href="#endpoints">Operações Externas e Endpoints</a></li>
+    <li><a href="#manifests">Manifestos Kubernetes</a></li>
+    <li><a href="#sequencia">Diagramas de Sequência</a></li>
+    <li><a href="#deps">Dependências entre Serviços</a></li>
+    <li><a href="#deploy">Deployment para Múltiplos Utilizadores</a></li>
+    <li><a href="#critico">Workload Crítico</a></li>
+    <li><a href="#locust">Latência e Cenários Locust</a></li>
+    <li><a href="#carga">Aumento de Carga e Latência</a></li>
+  </ol>
+</div>
+
+<hr>
+
+<!-- ============================================================ -->
+<h1 id="arq">1 — Arquitetura dos Microserviços</h1>
+
+<p>
+  O <strong>Online Boutique</strong> é uma aplicação de e-commerce composta por <strong>12 microserviços</strong>
+  (11 na configuração base + 1 opcional para Google Cloud),
+  cada um desenvolvido numa linguagem diferente e com uma responsabilidade única.
+  Esta abordagem — conhecida como arquitetura de microserviços — permite que cada componente seja desenvolvido,
+  testado, escalado e atualizado de forma independente, sem afetar os restantes.
+</p>
+<p>
+  A comunicação interna entre serviços é feita exclusivamente via <strong>gRPC</strong>, um protocolo de chamada
+  remota de procedimentos (RPC) baseado em HTTP/2, que é mais eficiente do que REST para comunicação
+  intra-serviço. O único ponto de entrada externo é o <strong>frontend</strong>, que expõe uma API HTTP normal
+  para o browser do utilizador.
+</p>
+<p>
+  O diagrama mostra os fluxos de comunicação: o utilizador acede ao <em>frontend</em>, que por sua vez
+  consulta os outros serviços consoante a operação pedida. O <em>loadgenerator</em> simula utilizadores reais
+  automaticamente para efeitos de teste.
+</p>
+
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'lineColor':'#546E7A','fontSize':'12px'}}}%%
+flowchart LR
+    classDef user  fill:#BBDEFB,stroke:#1565C0,stroke-width:2px,color:#000
+    classDef fe    fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px,color:#000,font-weight:bold
+    classDef svc   fill:#E3F2FD,stroke:#1565C0,stroke-width:1px,color:#000
+    classDef db    fill:#FFF3E0,stroke:#E65100,stroke-width:1.5px,color:#000
+    classDef ext   fill:#F3E5F5,stroke:#6A1B9A,color:#000
+
+    U(["👤 Utilizador"]):::user
+    LG["🔄 loadgenerator\nPython/Locust"]:::ext
+    FE["🌐 frontend\nGo :8080"]:::fe
+
+    subgraph SVCS["Microserviços internos (gRPC)"]
+        PC["productcatalog\nGo :3550"]:::svc
+        CART["cartservice\nC# :7070"]:::svc
+        CH["checkoutservice\nGo :5050"]:::svc
+        CUR["currencyservice\nNode.js :7000"]:::svc
+        REC["recommendation\nPython :8080"]:::svc
+        SH["shippingservice\nGo :50051"]:::svc
+        AD["adservice\nJava :9555"]:::svc
+        PAY["paymentservice\nNode.js :50051"]:::svc
+        EMAIL["emailservice\nPython :5000"]:::svc
+    end
+
+    subgraph OPT["Serviço opcional (GCP)"]
+        SA["shoppingassistant\nPython :8080\n(Gemini + AlloyDB)"]:::ext
+    end
+
+    REDIS[("redis-cart\n:6379")]:::db
+    ALLOYDB[("AlloyDB\n+ Gemini API")]:::db
+
+    U -->|HTTP :80| FE
+    LG -->|HTTP| FE
+    FE -->|gRPC| PC & CART & CH & CUR & REC & SH & AD
+    FE -->|HTTP opcional| SA
+    CH -->|gRPC| PC & CART & CUR & SH & PAY & EMAIL
+    REC -->|gRPC| PC
+    CART -->|TCP| REDIS
+    SA -->|Cloud API| ALLOYDB
+</div>
+
+<div class="info">
+  <strong>Porquê gRPC e não REST?</strong> O gRPC usa Protobuf (binary serialization) em vez de JSON, o que
+  é até 10x mais rápido em parsing. Além disso, usa HTTP/2 que permite multiplexar várias chamadas na mesma
+  conexão TCP, reduzindo latência. Em sistemas com muitas chamadas inter-serviço (como este), faz diferença significativa.
+</div>
+
+<table>
+  <thead><tr><th>Serviço</th><th>Linguagem</th><th>Porta</th><th>Responsabilidade principal</th></tr></thead>
+  <tbody>
+    <tr><td>frontend</td><td><span class="badge go">Go</span></td><td>8080</td><td>Servidor HTTP, renderiza as páginas, orquestra chamadas para os outros serviços</td></tr>
+    <tr><td>productcatalogservice</td><td><span class="badge go">Go</span></td><td>3550</td><td>Lista e detalha produtos a partir de um ficheiro JSON estático</td></tr>
+    <tr><td>checkoutservice</td><td><span class="badge go">Go</span></td><td>5050</td><td>Orquestra o processo de checkout: valida carrinho, cobra pagamento, envia email</td></tr>
+    <tr><td>shippingservice</td><td><span class="badge go">Go</span></td><td>50051</td><td>Calcula custo de envio e confirma expedição (simulado)</td></tr>
+    <tr><td>cartservice</td><td><span class="badge cs">C#</span></td><td>7070</td><td>Gere o carrinho de compras persistido no Redis</td></tr>
+    <tr><td>currencyservice</td><td><span class="badge node">Node.js</span></td><td>7000</td><td>Converte preços entre moedas usando taxas do Banco Central Europeu</td></tr>
+    <tr><td>paymentservice</td><td><span class="badge node">Node.js</span></td><td>50051</td><td>Processa o pagamento com cartão de crédito (simulado)</td></tr>
+    <tr><td>emailservice</td><td><span class="badge py">Python</span></td><td>5000 <small>(container: 8080)</small></td><td>Envia email de confirmação de encomenda (simulado)</td></tr>
+    <tr><td>recommendationservice</td><td><span class="badge py">Python</span></td><td>8080</td><td>Sugere produtos relacionados com base no carrinho atual</td></tr>
+    <tr><td>adservice</td><td><span class="badge java">Java</span></td><td>9555</td><td>Serve anúncios contextuais baseados nas palavras-chave da página</td></tr>
+    <tr><td>loadgenerator</td><td><span class="badge py">Python</span></td><td>—</td><td>Simula utilizadores reais com Locust para testes de carga</td></tr>
+    <tr><td>shoppingassistantservice</td><td><span class="badge py">Python</span></td><td>8080</td><td>Assistente de compras por IA com Google Gemini + AlloyDB (opcional, apenas GCP — sem manifesto K8s padrão)</td></tr>
+    <tr><td>redis-cart</td><td>—</td><td>6379</td><td>Base de dados em memória para armazenar os carrinhos de compras</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<!-- ============================================================ -->
+<h1 id="endpoints">2 — Operações Externas e Endpoints</h1>
+
+<p>
+  O <strong>frontend</strong> é o único serviço com endpoints HTTP acessíveis do exterior.
+  Todos os outros serviços são internos ao cluster e comunicam via gRPC.
+  Do ponto de vista do utilizador (ou do load generator), existem <strong>8 endpoints HTTP</strong>.
+</p>
+<p>
+  O <strong>peso</strong> na coluna da direita representa a frequência relativa com que o Locust executa
+  cada operação: um peso de 10 significa que <em>browseProduct</em> é executado 10 vezes mais do que
+  <em>checkout</em>. Isto reflete o comportamento real de utilizadores numa loja online:
+  a maioria navega, poucos compram.
+</p>
+<p>
+  Internamente, cada pedido HTTP que chega ao frontend gera uma ou mais chamadas gRPC para os serviços
+  responsáveis. Por exemplo, carregar a página de um produto (/product/{id}) desencadeia 5 chamadas
+  gRPC em paralelo: catálogo, moeda, recomendações, anúncios e carrinho.
+</p>
+
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+flowchart LR
+    classDef get  fill:#C8E6C9,stroke:#388E3C,color:#000
+    classDef post fill:#BBDEFB,stroke:#1976D2,color:#000
+    classDef svc  fill:#F3E5F5,stroke:#7B1FA2,color:#000
+
+    subgraph EXT["Endpoints HTTP (acesso externo)"]
+        G1["GET /"]:::get
+        G2["GET /product/{id}"]:::get
+        G3["GET /cart"]:::get
+        G4["GET /logout"]:::get
+        P1["POST /setCurrency"]:::post
+        P2["POST /cart"]:::post
+        P3["POST /cart/checkout"]:::post
+        P4["POST /cart/empty"]:::post
+    end
+
+    subgraph INT["Serviços gRPC chamados"]
+        S1["productcatalog"]:::svc
+        S2["currency"]:::svc
+        S3["recommendation"]:::svc
+        S4["adservice"]:::svc
+        S5["cart + Redis"]:::svc
+        S6["shipping"]:::svc
+        S7["checkout"]:::svc
+    end
+
+    G1 --> S1 & S2 & S3 & S4
+    G2 --> S1 & S2 & S3 & S4 & S5
+    G3 --> S5 & S6 & S2
+    P1 --> S2
+    P2 --> S1 & S5
+    P3 --> S7
+    P4 --> S5
+</div>
+
+<table>
+  <thead><tr><th>Endpoint</th><th>Método</th><th>O que faz</th><th>Serviços gRPC chamados</th><th>Peso Locust</th></tr></thead>
+  <tbody>
+    <tr><td>/</td><td>GET</td><td>Página inicial com produtos em destaque</td><td>productcatalog, currency, recommendation, ad</td><td>1</td></tr>
+    <tr><td>/product/{id}</td><td>GET</td><td>Página de detalhe de produto</td><td>productcatalog, currency, recommendation, ad, cart</td><td><strong>10</strong> — mais chamado</td></tr>
+    <tr><td>/cart</td><td>GET</td><td>Ver o carrinho com preços de envio</td><td>cart, shipping, currency</td><td>3</td></tr>
+    <tr><td>/setCurrency</td><td>POST</td><td>Alterar a moeda de apresentação</td><td>currency</td><td>2</td></tr>
+    <tr><td>/cart</td><td>POST</td><td>Adicionar produto ao carrinho</td><td>productcatalog, cart</td><td>2</td></tr>
+    <tr><td>/cart/checkout</td><td>POST</td><td>Finalizar compra (orquestra 6 serviços)</td><td>checkout → cart, catalog, currency, shipping, payment, email</td><td>1</td></tr>
+    <tr><td>/cart/empty</td><td>POST</td><td>Esvaziar carrinho</td><td>cart</td><td>—</td></tr>
+    <tr><td>/logout</td><td>GET</td><td>Terminar sessão</td><td>nenhum</td><td>—</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<!-- ============================================================ -->
+<h1 id="manifests">3 — Manifestos Kubernetes</h1>
+
+<p>
+  Um <strong>manifesto Kubernetes</strong> é um ficheiro YAML que descreve <em>o estado desejado</em> da aplicação.
+  Em vez de dizer "corre este container agora", dizes "quero que este serviço esteja sempre a correr com estas
+  configurações". O Kubernetes lê o ficheiro e trata de garantir esse estado — se um pod falhar, é recriado automaticamente.
+</p>
+<p>
+  Neste projeto existem <strong>12 ficheiros YAML</strong> em <code>kubernetes-manifests/</code> (11 manifestos de serviço + <code>kustomization.yaml</code>).
+  O ficheiro <code>release/kubernetes-manifests.yaml</code> é a junção de todos eles num único ficheiro.
+  Um único comando aplica tudo: <code>kubectl apply -f release/kubernetes-manifests.yaml</code>.
+</p>
+
+<h2>3a — O que acontece quando corres kubectl apply</h2>
+<p>
+  O diagrama mostra o fluxo interno do Kubernetes desde o momento em que corres o comando até o pod
+  estar efetivamente a servir tráfego. O ponto importante é que o Kubernetes não inicia tráfego
+  para um pod enquanto o <em>readinessProbe</em> não passar — garante que o serviço está realmente pronto.
+</p>
+
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+sequenceDiagram
+    actor Dev as Tu
+    participant KC as kubectl
+    participant API as Kubernetes API
+    participant Node as Docker Desktop
+
+    Dev->>KC: kubectl apply -f kubernetes-manifests.yaml
+    KC->>API: Envia definições YAML
+    API->>API: Valida + guarda no etcd
+    API->>Node: Agenda pod no node
+    Node->>Node: docker pull imagem
+    Node->>Node: Inicia container
+    Node->>API: readinessProbe OK ✅
+    API-->>Dev: deployment created / pod Running
+</div>
+
+<h2>3b — Estrutura de um ficheiro YAML</h2>
+<p>
+  Cada ficheiro tem <strong>3 blocos separados por <code>---</code></strong>. O diagrama usa o
+  <code>checkoutservice.yaml</code> como exemplo. O bloco mais importante é o <strong>Deployment</strong>
+  — define a imagem Docker, as variáveis de ambiente (como o endereço dos outros serviços), os limites de
+  recursos e as health probes. O <strong>Service</strong> cria o nome DNS interno para que outros pods
+  encontrem este serviço. O <strong>ServiceAccount</strong> define a identidade de segurança.
+</p>
+
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+flowchart TD
+    classDef yaml  fill:#FFF9C4,stroke:#F9A825,stroke-width:2px,color:#000,font-weight:bold
+    classDef info  fill:#FAFAFA,stroke:#B0BEC5,color:#333,font-size:11px
+
+    YAML["📄 checkoutservice.yaml"]:::yaml
+
+    subgraph B1["Bloco 1 — Deployment"]
+        I1["image: checkoutservice"]:::info
+        I2["port: 5050"]:::info
+        I3["env: CART_SERVICE_ADDR=cartservice:7070\n      PAYMENT_SERVICE_ADDR=paymentservice:50051"]:::info
+        I4["cpu: 100m–200m  /  memory: 64–128Mi"]:::info
+        I5["readinessProbe + livenessProbe: grpc :5050"]:::info
+    end
+
+    subgraph B2["Bloco 2 — Service ClusterIP"]
+        I6["name: checkoutservice → DNS interno"]:::info
+        I7["port 5050 (outros pods usam checkoutservice:5050)"]:::info
+    end
+
+    subgraph B3["Bloco 3 — ServiceAccount"]
+        I8["identidade RBAC do pod no cluster"]:::info
+    end
+
+    YAML --> B1 & B2 & B3
+</div>
+
+<h2>3c — Recursos criados por cada manifesto</h2>
+<p>
+  A tabela mostra exactamente o que cada ficheiro YAML cria no cluster.
+  O <strong>loadgenerator</strong> é o único que não tem Service (não precisa de ser encontrado por outros pods)
+  nem ServiceAccount (não precisa de permissões especiais). O <strong>cartservice.yaml</strong> é especial
+  porque inclui também o <em>redis-cart</em> — dois deployments num único ficheiro.
+</p>
+
+<table>
+  <thead><tr><th>Ficheiro YAML</th><th>Deployment</th><th>Service ClusterIP</th><th>Service LoadBalancer</th><th>ServiceAccount</th></tr></thead>
+  <tbody>
+    <tr><td>frontend.yaml</td><td>✅</td><td>✅ frontend:80</td><td>✅ <strong>localhost:80</strong></td><td>✅</td></tr>
+    <tr><td>cartservice.yaml</td><td>✅ + ✅ redis-cart</td><td>✅ (ambos)</td><td>—</td><td>✅</td></tr>
+    <tr><td>checkoutservice.yaml</td><td>✅</td><td>✅ :5050</td><td>—</td><td>✅</td></tr>
+    <tr><td>productcatalogservice.yaml</td><td>✅</td><td>✅ :3550</td><td>—</td><td>✅</td></tr>
+    <tr><td>currencyservice.yaml</td><td>✅</td><td>✅ :7000</td><td>—</td><td>✅</td></tr>
+    <tr><td>paymentservice.yaml</td><td>✅</td><td>✅ :50051</td><td>—</td><td>✅</td></tr>
+    <tr><td>emailservice.yaml</td><td>✅</td><td>✅ :5000</td><td>—</td><td>✅</td></tr>
+    <tr><td>shippingservice.yaml</td><td>✅</td><td>✅ :50051</td><td>—</td><td>✅</td></tr>
+    <tr><td>recommendationservice.yaml</td><td>✅</td><td>✅ :8080</td><td>—</td><td>✅</td></tr>
+    <tr><td>adservice.yaml</td><td>✅</td><td>✅ :9555</td><td>—</td><td>✅</td></tr>
+    <tr><td>loadgenerator.yaml</td><td>✅</td><td>—</td><td>—</td><td>✅</td></tr>
+  </tbody>
+</table>
+
+<table>
+  <thead><tr><th>Recurso</th><th>Função</th><th>Analogia</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Deployment</strong></td><td>Garante N réplicas sempre a correr. Recria pods que falham automaticamente.</td><td>"Supervisor" que reinicia processos mortos</td></tr>
+    <tr><td><strong>Service ClusterIP</strong></td><td>DNS interno estável (<code>cartservice:7070</code>). Faz load balance entre réplicas.</td><td>"Lista telefónica" interna do cluster</td></tr>
+    <tr><td><strong>Service LoadBalancer</strong></td><td>Expõe para fora do cluster. No Docker Desktop → <code>localhost:80</code>.</td><td>"Porta de entrada" pública da loja</td></tr>
+    <tr><td><strong>ServiceAccount</strong></td><td>Identidade do pod para controlo de acesso (RBAC).</td><td>"Cartão de identificação" do serviço</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<!-- ============================================================ -->
+<h1 id="sequencia">4 — Diagramas de Sequência</h1>
+
+<p>
+  Os diagramas de sequência mostram a ordem exacta das chamadas entre serviços para cada operação.
+  São úteis para perceber a <strong>latência acumulada</strong>: cada seta é um pedido de rede,
+  e o tempo total de resposta é a soma de todas as chamadas em série.
+  Chamadas que podem ser feitas em paralelo são representadas sem dependência entre si.
+</p>
+
+<h2>4a — Browse de um produto <span style="color:#888;font-weight:normal;font-size:.9em">(peso 10 — operação mais frequente)</span></h2>
+<p>
+  Esta é a operação mais chamada no sistema. Quando o utilizador abre a página de um produto, o frontend
+  faz <strong>5 chamadas gRPC</strong>: busca o produto, converte o preço, pede recomendações, pede anúncios
+  e verifica o carrinho. Algumas podem ser paralelas, mas nesta implementação são sequenciais —
+  o que aumenta a latência total.
+</p>
+
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+sequenceDiagram
+    actor U as Utilizador
+    participant FE as frontend
+    participant PC as productcatalog
+    participant CUR as currency
+    participant REC as recommendation
+    participant AD as adservice
+    participant CART as cartservice
+
+    U->>FE: GET /product/{id}
+    FE->>PC: GetProduct(id)
+    PC-->>FE: produto + preço base
+    FE->>CUR: Convert(preço, moeda do utilizador)
+    CUR-->>FE: preço convertido
+    FE->>REC: ListRecommendations(product_ids)
+    REC->>PC: GetProduct(ids sugeridos)
+    PC-->>REC: produtos
+    REC-->>FE: lista de sugestões
+    FE->>AD: GetAds(context)
+    AD-->>FE: anúncios
+    FE->>CART: GetCart(session_id)
+    CART-->>FE: itens no carrinho
+    FE-->>U: Página HTML renderizada
+</div>
+
+<h2>4b — Checkout <span style="color:#888;font-weight:normal;font-size:.9em">(operação mais complexa — 6 serviços em cadeia)</span></h2>
+<p>
+  O checkout é a operação mais complexa e com maior latência. O <strong>checkoutservice</strong> age
+  como orquestrador: chama os outros serviços em sequência, e o tempo total é a <em>soma de todas as latências</em>.
+  Se qualquer serviço ficar lento (ex: paymentservice), todo o checkout fica lento.
+  É por isso que o checkoutservice é um <strong>ponto crítico de falha</strong>.
+</p>
+
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+sequenceDiagram
+    actor U as Utilizador
+    participant FE as frontend
+    participant CH as checkoutservice
+    participant CART as cartservice
+    participant PC as productcatalog
+    participant CUR as currency
+    participant SH as shipping
+    participant PAY as payment
+    participant EMAIL as email
+
+    U->>FE: POST /cart/checkout
+    FE->>CH: PlaceOrder(user, address, card)
+    CH->>CART: GetCart(user_id)
+    CART-->>CH: itens[]
+    CH->>PC: GetProduct(item_ids)
+    PC-->>CH: preços
+    CH->>CUR: Convert(preços)
+    CUR-->>CH: preços convertidos
+    CH->>SH: GetQuote(address, itens)
+    SH-->>CH: custo envio
+    CH->>SH: ShipOrder(address)
+    SH-->>CH: tracking_id
+    CH->>PAY: Charge(card, total)
+    PAY-->>CH: transaction_id
+    CH->>CART: EmptyCart(user_id)
+    CH->>EMAIL: SendConfirmation(email, order)
+    EMAIL-->>CH: OK
+    CH-->>FE: order_id + tracking_id
+    FE-->>U: Página de confirmação
+</div>
+
+<h2>4c — Adicionar ao carrinho</h2>
+<p>
+  Operação simples: o frontend valida que o produto existe, depois pede ao cartservice para o guardar.
+  O cartservice persiste no Redis com uma chave baseada no <code>session_id</code> do utilizador.
+  Como o Redis está em memória, esta operação é muito rápida (sub-milissegundo de escrita).
+</p>
+
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+sequenceDiagram
+    actor U as Utilizador
+    participant FE as frontend
+    participant PC as productcatalog
+    participant CART as cartservice
+    participant R as redis-cart
+
+    U->>FE: POST /cart {product_id, qty}
+    FE->>PC: GetProduct(product_id)
+    PC-->>FE: produto válido
+    FE->>CART: AddItem(session_id, product_id, qty)
+    CART->>R: HSET cart:{session_id}
+    R-->>CART: OK
+    CART-->>FE: OK
+    FE-->>U: Redirect → /cart
+</div>
+
+<hr>
+
+<!-- ============================================================ -->
+<h1 id="deps">5 — Dependências entre Serviços</h1>
+
+<p>
+  Conhecer as dependências é essencial para perceber o <strong>impacto de uma falha</strong>.
+  Se o <em>productcatalogservice</em> falhar, afeta o frontend, o checkoutservice e o recommendationservice
+  simultaneamente. Se o <em>redis-cart</em> falhar, o cartservice fica indisponível, o que bloqueia
+  checkouts e adições ao carrinho.
+</p>
+<p>
+  Os serviços sem dependências externas (folhas) são os mais resilientes: <em>paymentservice</em>,
+  <em>emailservice</em>, <em>adservice</em> e <em>shippingservice</em> são independentes e raramente
+  falham por causa de outro serviço. Já o <strong>frontend</strong> depende de 8 serviços — é o mais
+  vulnerável a falhas em cascata.
+</p>
+
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+flowchart LR
+    classDef fe   fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px,color:#000,font-weight:bold
+    classDef hub  fill:#FFCDD2,stroke:#C62828,stroke-width:2px,color:#000
+    classDef svc  fill:#E3F2FD,stroke:#1565C0,color:#000
+    classDef leaf fill:#F1F8E9,stroke:#558B2F,color:#000
+    classDef db   fill:#FFF3E0,stroke:#E65100,color:#000
+    classDef ext  fill:#EDE7F6,stroke:#4527A0,color:#000
+
+    LG["loadgenerator"]:::ext
+    FE["frontend\n(depende de 8)"]:::fe
+    CH["checkoutservice\n(depende de 6)"]:::hub
+    PC["productcatalog"]:::svc
+    CART["cartservice"]:::svc
+    CUR["currencyservice"]:::svc
+    REC["recommendation"]:::svc
+    SH["shippingservice"]:::leaf
+    PAY["paymentservice"]:::leaf
+    EMAIL["emailservice"]:::leaf
+    AD["adservice"]:::leaf
+    REDIS[("redis-cart")]:::db
+
+    LG -->|HTTP| FE
+    FE --> PC & CART & CH & CUR & REC & SH & AD
+    CH --> PC & CART & CUR & SH & PAY & EMAIL
+    REC --> PC
+    CART --> REDIS
+</div>
+
+<table>
+  <thead><tr><th>Serviço</th><th>Depende de</th><th>Chamado por</th><th>Risco de falha</th></tr></thead>
+  <tbody>
+    <tr><td>productcatalogservice</td><td>Nenhum</td><td>frontend, checkout, recommendation</td><td>🔴 Alto — afeta 3 serviços</td></tr>
+    <tr><td>cartservice + Redis</td><td>redis-cart</td><td>frontend, checkout</td><td>🔴 Alto — bloqueia compras</td></tr>
+    <tr><td>currencyservice</td><td>ECB API (externo)</td><td>frontend, checkout</td><td>🟠 Médio</td></tr>
+    <tr><td>checkoutservice</td><td>6 serviços</td><td>frontend</td><td>🟠 Médio — ponto de orquestração</td></tr>
+    <tr><td>shippingservice</td><td>Nenhum</td><td>frontend, checkout</td><td>🟢 Baixo</td></tr>
+    <tr><td>paymentservice</td><td>Nenhum</td><td>checkout</td><td>🟢 Baixo</td></tr>
+    <tr><td>emailservice</td><td>Nenhum</td><td>checkout</td><td>🟢 Baixo (não bloqueia checkout)</td></tr>
+    <tr><td>adservice</td><td>Nenhum</td><td>frontend</td><td>🟢 Baixo (degradação suave)</td></tr>
+    <tr><td>shoppingassistantservice</td><td>AlloyDB + Gemini API (Google Cloud)</td><td>frontend (opcional)</td><td>🟡 N/A — serviço opcional, apenas em GCP; não afeta o deployment base</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<!-- ============================================================ -->
+<h1 id="deploy">6 — Deployment para Múltiplos Utilizadores</h1>
+
+<p>
+  Com Kubernetes, escalar para mais utilizadores é uma questão de <strong>aumentar o número de réplicas</strong>
+  de um serviço. O Kubernetes distribui automaticamente o tráfego entre as réplicas através do Service
+  (que funciona como load balancer interno).
+</p>
+<p>
+  Existem duas abordagens: <strong>escalonamento manual</strong> (defines tu o número de pods)
+  e <strong>HPA — Horizontal Pod Autoscaler</strong> (o Kubernetes decide automaticamente com base em métricas
+  como CPU ou memória). O HPA é mais adequado para cargas variáveis — por exemplo, mais tráfego durante o
+  dia e menos à noite.
+</p>
+<p>
+  A estratégia inteligente é escalar primeiro os serviços que são <em>bottleneck</em> (ver secção 7),
+  não todos ao mesmo tempo. Escalar o frontend não adianta se o productcatalogservice está saturado.
+</p>
+
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+flowchart LR
+    classDef user fill:#BBDEFB,stroke:#1565C0,color:#000
+    classDef lb   fill:#FFCDD2,stroke:#C62828,color:#000,font-weight:bold
+    classDef pod  fill:#C8E6C9,stroke:#388E3C,color:#000
+    classDef hpa  fill:#EDE7F6,stroke:#7B1FA2,color:#000
+    classDef svc  fill:#E3F2FD,stroke:#1565C0,color:#000
+
+    U(["👥 N utilizadores"]):::user
+    LB["Service LoadBalancer\nlocalhost:80"]:::lb
+    HPA["HPA\ncpu > 50% → +pods"]:::hpa
+
+    subgraph PODS["frontend pods (escalável)"]
+        P1["pod 1"]:::pod
+        P2["pod 2"]:::pod
+        P3["pod 3"]:::pod
+    end
+
+    SVCS["Serviços internos\n(também escaláveis)"]:::svc
+
+    U --> LB
+    LB --> P1 & P2 & P3
+    HPA -.->|auto-scale| PODS
+    P1 & P2 & P3 --> SVCS
+</div>
+
+<table>
+  <thead><tr><th>Estratégia</th><th>Comando</th><th>Quando usar</th></tr></thead>
+  <tbody>
+    <tr><td>Escalar réplicas manualmente</td><td><code>kubectl scale deployment frontend --replicas=3</code></td><td>Sabes antecipadamente a carga esperada</td></tr>
+    <tr><td>HPA automático por CPU</td><td><code>kubectl autoscale deployment frontend --cpu-percent=50 --min=1 --max=5</code></td><td>Carga variável e imprevisível</td></tr>
+    <tr><td>Escalar serviço crítico</td><td><code>kubectl scale deployment productcatalogservice --replicas=3</code></td><td>Quando identificas o bottleneck (secção 7)</td></tr>
+    <tr><td>Aumentar limites de recursos</td><td>Editar o YAML: <code>cpu.limits: 500m</code></td><td>Pod usa CPU máxima mas não há mais pods a lançar</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<!-- ============================================================ -->
+<h1 id="critico">7 — Workload Crítico</h1>
+
+<p>
+  Para perceber o que é mais crítico, analisa-se a combinação de dois fatores:
+  a <strong>frequência</strong> com que cada operação é chamada (pesos do Locust) e o
+  <strong>número de serviços</strong> que cada operação envolve.
+</p>
+<p>
+  O <em>browseProduct</em> tem peso 10 — é executado 10 vezes mais do que o checkout.
+  Como envolve 5 serviços (productcatalog, currency, recommendation, adservice, cart),
+  estes são os serviços sob maior pressão contínua.
+  O <em>productcatalogservice</em> é chamado em quase todas as operações e não tem cache —
+  <strong>é o maior bottleneck potencial</strong>.
+</p>
+<p>
+  O checkout, apesar de complexo, é pouco frequente. O redis-cart é crítico porque é
+  single-threaded: com muita carga simultânea de carrinho, as operações ficam em fila.
+</p>
+
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+flowchart LR
+    classDef hot  fill:#FFCDD2,stroke:#C62828,stroke-width:2px,color:#000,font-weight:bold
+    classDef warm fill:#FFF9C4,stroke:#F9A825,color:#000
+    classDef cold fill:#E8F5E9,stroke:#388E3C,color:#000
+
+    subgraph OP["Operações por frequência"]
+        O1["browseProduct  peso 10🔥"]:::hot
+        O2["viewCart  peso 3"]:::warm
+        O3["setCurrency  peso 2"]:::warm
+        O4["addToCart  peso 2"]:::warm
+        O5["index  peso 1"]:::cold
+        O6["checkout  peso 1"]:::cold
+    end
+
+    subgraph SVC["Serviços sob pressão"]
+        S1["productcatalog 🔴 crítico"]:::hot
+        S2["currencyservice 🔴 crítico"]:::hot
+        S3["cartservice+Redis 🔴 crítico"]:::hot
+        S4["recommendation 🟠"]:::warm
+        S5["adservice 🟠"]:::warm
+        S6["checkoutservice 🟢"]:::cold
+    end
+
+    O1 --> S1 & S2 & S4 & S5
+    O2 --> S3 & S2
+    O3 --> S2
+    O4 --> S1 & S3
+    O6 --> S6
+</div>
+
+<div class="note">
+  <strong>Bottlenecks por ordem de prioridade:</strong><br>
+  1. <span class="critical">productcatalogservice</span> — chamado em browse (×10), addToCart (×2), index, checkout. Sem cache. Escalar primeiro.<br>
+  2. <span class="critical">currencyservice</span> — chamado em browse, viewCart, checkout. Faz chamada HTTP externa ao BCE em cada pedido.<br>
+  3. <span class="critical">cartservice + redis-cart</span> — Redis é single-threaded. Com 100+ users simultâneos, as operações ficam em fila.<br>
+  4. <span class="critical">checkoutservice</span> — Chama 6 serviços em sequência. Latência total = soma das latências individuais.
+</div>
+
+<hr>
+
+<!-- ============================================================ -->
+<h1 id="locust">8 — Latência e Cenários Locust</h1>
+
+<p>
+  O <strong>Locust</strong> é a ferramenta de load testing já incluída no projeto (pasta <code>src/loadgenerator</code>).
+  Simula utilizadores reais que navegam, adicionam ao carrinho e fazem checkout, com tempos de espera
+  aleatórios entre operações (1 a 10 segundos), tal como um utilizador real faria.
+</p>
+<p>
+  O ficheiro <code>locustfile.py</code> define o comportamento: a classe <code>WebsiteUser</code> tem uma
+  lista de tarefas com pesos. O Locust escolhe aleatoriamente a próxima tarefa com base no peso —
+  <em>browseProduct</em> (peso 10) é escolhido 10 vezes mais do que <em>checkout</em> (peso 1).
+</p>
+<p>
+  As métricas mais importantes a observar são:
+  <strong>p50</strong> (mediana — metade dos pedidos é mais rápido que este valor),
+  <strong>p90</strong> (90% dos pedidos é mais rápido),
+  <strong>p99</strong> (99% dos pedidos é mais rápido — revela os casos extremos).
+  Em sistemas de produção, normalmente define-se um SLA como "p99 &lt; 500ms".
+</p>
+
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+flowchart LR
+    classDef user fill:#C8E6C9,stroke:#388E3C,color:#000,font-weight:bold
+    classDef task fill:#E3F2FD,stroke:#1565C0,color:#000
+    classDef freq fill:#FFCDD2,stroke:#C62828,color:#000
+
+    WU["WebsiteUser\nwait: 1–10s"]:::user
+    T1["index /\npeso 1"]:::task
+    T2["setCurrency\npeso 2"]:::task
+    T3["browseProduct\npeso 10 🔥"]:::freq
+    T4["addToCart\npeso 2"]:::task
+    T5["viewCart\npeso 3"]:::task
+    T6["checkout\npeso 1"]:::task
+
+    WU --> T1 & T2 & T3 & T4 & T5 & T6
+</div>
+
+<h2>Como correr testes de latência</h2>
+
+<p><strong>Opção A — Interface gráfica (recomendado para explorar):</strong></p>
+<pre>
+pip install locust faker
+cd src/loadgenerator
+locust --host=http://localhost --web-port=8089
+# Abre http://localhost:8089
+# Define: Number of users = 50, Spawn rate = 5/s → Start
+# Vês em tempo real: req/s, p50, p90, p99, erros
+</pre>
+
+<p><strong>Opção B — Terminal, sem interface (para exportar dados CSV):</strong></p>
+<pre>
+locust --host=http://localhost \
+       --users=50 --spawn-rate=5 \
+       --run-time=3m --headless \
+       --csv=resultados
+# Gera: resultados_stats.csv  com p50, p90, p95, p99, max por endpoint
+# Gera: resultados_failures.csv com erros
+</pre>
+
+<p><strong>Opção C — k6 (mais simples, sem instalar Locust):</strong></p>
+<pre>
+brew install k6
+k6 run --vus 50 --duration 60s - &lt;&lt;EOF
+import http from 'k6/http';
+import { sleep } from 'k6';
+export default function() {
+  http.get('http://localhost/');
+  http.get('http://localhost/product/OLJCESPC7Z');
+  sleep(Math.random() * 3);
+}
+EOF
+# Output: p50, p90, p95, p99 diretamente no terminal
+</pre>
+
+<hr>
+
+<!-- ============================================================ -->
+<h1 id="carga">9 — Aumento de Carga e Evolução da Latência</h1>
+
+<p>
+  A estratégia correta para load testing é <strong>progressiva</strong>: começas com poucos utilizadores
+  para estabelecer a baseline e vais aumentando, observando como a latência evolui.
+  O objetivo não é "rebentar" o sistema, mas <em>encontrar o ponto onde a degradação começa</em>
+  e perceber qual o serviço responsável.
+</p>
+<p>
+  Em sistemas de microserviços, a degradação raramente acontece de forma uniforme — normalmente
+  um serviço específico satura primeiro (o bottleneck) e arrasta os outros. Com Kubernetes,
+  a resposta é escalar esse serviço específico em vez de escalar tudo.
+</p>
+
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+flowchart LR
+    classDef fase fill:#E3F2FD,stroke:#1565C0,stroke-width:2px,color:#000,font-weight:bold
+    classDef ok   fill:#C8E6C9,stroke:#388E3C,color:#000
+    classDef warn fill:#FFF9C4,stroke:#F9A825,color:#000
+    classDef crit fill:#FFCDD2,stroke:#C62828,color:#000
+
+    F1["Fase 1\n5 users\nBaseline"]:::fase
+    F2["Fase 2\n25 users"]:::fase
+    F3["Fase 3\n100 users"]:::fase
+    F4["Fase 4\n250 users\nStress"]:::fase
+
+    R1["✅ p99 &lt; 200ms\nSistema estável"]:::ok
+    R2["⚠️ p99 ~400ms\nProductCatalog lento"]:::warn
+    R3["⚠️ p99 ~1–2s\nRedis em fila"]:::warn
+    R4["❌ Timeouts\nCheckout a falhar"]:::crit
+
+    F1 --> R1 --> F2
+    F2 --> R2 --> F3
+    F3 --> R3 --> F4
+    F4 --> R4
+</div>
+
+<p>
+  Em cada fase, o objetivo é registar os valores de p50, p90 e p99 para cada endpoint.
+  Quando o p99 de um endpoint começa a subir de forma desproporcionada, encontraste o bottleneck.
+  A tabela abaixo guia o que observar em cada fase e como reagir.
+</p>
+
+<table>
+  <thead><tr><th>Fase</th><th>Utilizadores</th><th>Duração</th><th>O que observar</th><th>Ação recomendada</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Baseline</strong></td><td>5</td><td>2 min</td><td>Latência base de cada endpoint — sem carga real</td><td>Anotar valores de referência (p50, p99)</td></tr>
+    <tr><td><strong>Normal</strong></td><td>25</td><td>5 min</td><td>Como evoluem p50 e p99? Algum endpoint cresce mais?</td><td>Comparar com baseline. Identificar desvios.</td></tr>
+    <tr><td><strong>Alto</strong></td><td>100</td><td>5 min</td><td>Qual serviço degrada primeiro? Ver <code>kubectl top pods</code></td><td>Escalar o serviço que usa mais CPU: <code>kubectl scale deployment X --replicas=3</code></td></tr>
+    <tr><td><strong>Stress</strong></td><td>250</td><td>5 min</td><td>Erros 5xx, pod restarts, timeouts no checkout</td><td>HPA ou aumentar limites de CPU/RAM nos YAMLs</td></tr>
+    <tr><td><strong>Spike</strong></td><td>0→500 em 30s</td><td>3 min</td><td>Quanto tempo leva o sistema a recuperar?</td><td>Avaliar HPA response time e ajustar <code>--stabilization-window</code></td></tr>
+  </tbody>
+</table>
+
+<h2>Comandos para monitorizar em paralelo durante os testes</h2>
+
+<pre>
+# Terminal 1 — CPU e RAM de todos os pods em tempo real
+kubectl top pods --sort-by=cpu
+
+# Terminal 2 — Eventos do cluster (restarts, erros, OOM)
+kubectl get events --sort-by=.lastTimestamp -w
+
+# Terminal 3 — Logs do serviço que estás a investigar
+kubectl logs -l app=productcatalogservice -f --tail=50
+
+# Terminal 4 — Grafana com métricas Prometheus
+kubectl port-forward svc/monitoring-grafana 3000:80
+# Abre http://localhost:3000  (admin / admin)
+# Dashboard: Kubernetes / Compute Resources / Pod
+</pre>
+
+<div class="note">
+  <strong>Para activar <code>kubectl top pods</code></strong>, instala o metrics-server:<br>
+  <code>kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml</code><br>
+  Depois aguarda ~1 minuto e os dados começam a aparecer.
+</div>
+
+<hr>
+<p style="color:#999;font-size:.85em;text-align:center;">Análise gerada para trabalho prático — Arquiteturas de Sistemas de Informação Distribuídos · 2026</p>
+</body>
+</html>

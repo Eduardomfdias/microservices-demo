@@ -1,0 +1,1231 @@
+<!DOCTYPE html><html><head>
+      <title>Diagramas-Arquitetura-Completo</title>s
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      
+      <link rel="stylesheet" href="file:////Users/edias/.vscode/extensions/shd101wyy.markdown-preview-enhanced-0.8.20/crossnote/dependencies/katex/katex.min.css">
+      
+      <script type="text/javascript" src="file:////Users/edias/.vscode/extensions/shd101wyy.markdown-preview-enhanced-0.8.20/crossnote/dependencies/mermaid/mermaid.min.js" charset="UTF-8"></script>
+      
+      
+      <style>
+      code[class*=language-],pre[class*=language-]{color:#333;background:0 0;font-family:Consolas,"Liberation Mono",Menlo,Courier,monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.4;-moz-tab-size:8;-o-tab-size:8;tab-size:8;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:.8em;overflow:auto;border-radius:3px;background:#f5f5f5}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal;background:#f5f5f5}.token.blockquote,.token.comment{color:#969896}.token.cdata{color:#183691}.token.doctype,.token.macro.property,.token.punctuation,.token.variable{color:#333}.token.builtin,.token.important,.token.keyword,.token.operator,.token.rule{color:#a71d5d}.token.attr-value,.token.regex,.token.string,.token.url{color:#183691}.token.atrule,.token.boolean,.token.code,.token.command,.token.constant,.token.entity,.token.number,.token.property,.token.symbol{color:#0086b3}.token.prolog,.token.selector,.token.tag{color:#63a35c}.token.attr-name,.token.class,.token.class-name,.token.function,.token.id,.token.namespace,.token.pseudo-class,.token.pseudo-element,.token.url-reference .token.variable{color:#795da3}.token.entity{cursor:help}.token.title,.token.title .token.punctuation{font-weight:700;color:#1d3e81}.token.list{color:#ed6a43}.token.inserted{background-color:#eaffea;color:#55a532}.token.deleted{background-color:#ffecec;color:#bd2c00}.token.bold{font-weight:700}.token.italic{font-style:italic}.language-json .token.property{color:#183691}.language-markup .token.tag .token.punctuation{color:#333}.language-css .token.function,code.language-css{color:#0086b3}.language-yaml .token.atrule{color:#63a35c}code.language-yaml{color:#183691}.language-ruby .token.function{color:#333}.language-markdown .token.url{color:#795da3}.language-makefile .token.symbol{color:#795da3}.language-makefile .token.variable{color:#183691}.language-makefile .token.builtin{color:#0086b3}.language-bash .token.keyword{color:#0086b3}pre[data-line]{position:relative;padding:1em 0 1em 3em}pre[data-line] .line-highlight-wrapper{position:absolute;top:0;left:0;background-color:transparent;display:block;width:100%}pre[data-line] .line-highlight{position:absolute;left:0;right:0;padding:inherit 0;margin-top:1em;background:hsla(24,20%,50%,.08);background:linear-gradient(to right,hsla(24,20%,50%,.1) 70%,hsla(24,20%,50%,0));pointer-events:none;line-height:inherit;white-space:pre}pre[data-line] .line-highlight:before,pre[data-line] .line-highlight[data-end]:after{content:attr(data-start);position:absolute;top:.4em;left:.6em;min-width:1em;padding:0 .5em;background-color:hsla(24,20%,50%,.4);color:#f4f1ef;font:bold 65%/1.5 sans-serif;text-align:center;vertical-align:.3em;border-radius:999px;text-shadow:none;box-shadow:0 1px #fff}pre[data-line] .line-highlight[data-end]:after{content:attr(data-end);top:auto;bottom:.4em}html body{font-family:'Helvetica Neue',Helvetica,'Segoe UI',Arial,freesans,sans-serif;font-size:16px;line-height:1.6;color:#333;background-color:#fff;overflow:initial;box-sizing:border-box;word-wrap:break-word}html body>:first-child{margin-top:0}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{line-height:1.2;margin-top:1em;margin-bottom:16px;color:#000}html body h1{font-size:2.25em;font-weight:300;padding-bottom:.3em}html body h2{font-size:1.75em;font-weight:400;padding-bottom:.3em}html body h3{font-size:1.5em;font-weight:500}html body h4{font-size:1.25em;font-weight:600}html body h5{font-size:1.1em;font-weight:600}html body h6{font-size:1em;font-weight:600}html body h1,html body h2,html body h3,html body h4,html body h5{font-weight:600}html body h5{font-size:1em}html body h6{color:#5c5c5c}html body strong{color:#000}html body del{color:#5c5c5c}html body a:not([href]){color:inherit;text-decoration:none}html body a{color:#08c;text-decoration:none}html body a:hover{color:#00a3f5;text-decoration:none}html body img{max-width:100%}html body>p{margin-top:0;margin-bottom:16px;word-wrap:break-word}html body>ol,html body>ul{margin-bottom:16px}html body ol,html body ul{padding-left:2em}html body ol.no-list,html body ul.no-list{padding:0;list-style-type:none}html body ol ol,html body ol ul,html body ul ol,html body ul ul{margin-top:0;margin-bottom:0}html body li{margin-bottom:0}html body li.task-list-item{list-style:none}html body li>p{margin-top:0;margin-bottom:0}html body .task-list-item-checkbox{margin:0 .2em .25em -1.8em;vertical-align:middle}html body .task-list-item-checkbox:hover{cursor:pointer}html body blockquote{margin:16px 0;font-size:inherit;padding:0 15px;color:#5c5c5c;background-color:#f0f0f0;border-left:4px solid #d6d6d6}html body blockquote>:first-child{margin-top:0}html body blockquote>:last-child{margin-bottom:0}html body hr{height:4px;margin:32px 0;background-color:#d6d6d6;border:0 none}html body table{margin:10px 0 15px 0;border-collapse:collapse;border-spacing:0;display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}html body table th{font-weight:700;color:#000}html body table td,html body table th{border:1px solid #d6d6d6;padding:6px 13px}html body dl{padding:0}html body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:700}html body dl dd{padding:0 16px;margin-bottom:16px}html body code{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;font-size:.85em;color:#000;background-color:#f0f0f0;border-radius:3px;padding:.2em 0}html body code::after,html body code::before{letter-spacing:-.2em;content:'\00a0'}html body pre>code{padding:0;margin:0;word-break:normal;white-space:pre;background:0 0;border:0}html body .highlight{margin-bottom:16px}html body .highlight pre,html body pre{padding:1em;overflow:auto;line-height:1.45;border:#d6d6d6;border-radius:3px}html body .highlight pre{margin-bottom:0;word-break:normal}html body pre code,html body pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}html body pre code:after,html body pre code:before,html body pre tt:after,html body pre tt:before{content:normal}html body blockquote,html body dl,html body ol,html body p,html body pre,html body ul{margin-top:0;margin-bottom:16px}html body kbd{color:#000;border:1px solid #d6d6d6;border-bottom:2px solid #c7c7c7;padding:2px 4px;background-color:#f0f0f0;border-radius:3px}@media print{html body{background-color:#fff}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{color:#000;page-break-after:avoid}html body blockquote{color:#5c5c5c}html body pre{page-break-inside:avoid}html body table{display:table}html body img{display:block;max-width:100%;max-height:100%}html body code,html body pre{word-wrap:break-word;white-space:pre}}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview ul{list-style:disc}.markdown-preview ul ul{list-style:circle}.markdown-preview ul ul ul{list-style:square}.markdown-preview ol{list-style:decimal}.markdown-preview ol ol,.markdown-preview ul ol{list-style-type:lower-roman}.markdown-preview ol ol ol,.markdown-preview ol ul ol,.markdown-preview ul ol ol,.markdown-preview ul ul ol{list-style-type:lower-alpha}.markdown-preview .newpage,.markdown-preview .pagebreak{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center!important}.markdown-preview:not([data-for=preview]) .code-chunk .code-chunk-btn-group{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .status{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .output-div{margin-bottom:16px}.markdown-preview .md-toc{padding:0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link div,.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}.markdown-preview .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0;min-height:100vh}@media screen and (min-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px + 2em)}}@media screen and (max-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{font-size:14px!important;padding:1em}}@media print{html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc{padding:0 16px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link div,html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% - 300px);padding:2em calc(50% - 457px - 300px / 2);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}
+/* Please visit the URL below for more information: */
+/*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
+
+      </style>
+      <!-- The content below will be included at the end of the <head> element. --><script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function () {
+    // your code here
+  });
+</script></head><body for="html-export">
+    
+      <div class="crossnote markdown-preview  ">
+      
+<h1 id="arquitetura-de-microserviços--sock-shop">Arquitetura de Microserviços — Online Boutique </h1>
+<h3 id="diagramas-de-arquitetura--análise-técnica-completa">Diagramas de Arquitetura · Análise Técnica Completa </h3>
+<blockquote>
+<p><strong>Aplicação:</strong> Google Microservices Demo (Online Boutique)<br>
+<strong>Tecnologias:</strong> Go · Java Spring Boot · Node.js · Kubernetes · Docker<br>
+<strong>Padrão:</strong> Microserviços com Database-per-Service e comunicação REST + AMQP</p>
+</blockquote>
+<hr>
+<h2 id="índice">Índice </h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">#</th>
+<th style="text-align:left">Diagrama</th>
+<th style="text-align:left">Secções</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><a href="#diagrama-1--vis%C3%A3o-geral-da-arquitetura-de-microservi%C3%A7os">1</a></td>
+<td style="text-align:left"><strong>Visão Geral da Arquitetura</strong></td>
+<td style="text-align:left">Mapa geral · Legenda · Inventário de serviços</td>
+</tr>
+<tr>
+<td style="text-align:center"><a href="#diagrama-2--bases-de-dados-e-polyglot-persistence">2</a></td>
+<td style="text-align:left"><strong>Bases de Dados e Polyglot Persistence</strong></td>
+<td style="text-align:left">Mapeamento serviço→BD · Anti-pattern vs. Pattern · Justificação</td>
+</tr>
+<tr>
+<td style="text-align:center"><a href="#diagrama-3--fluxos-de-comunica%C3%A7%C3%A3o">3</a></td>
+<td style="text-align:left"><strong>Fluxos de Comunicação</strong></td>
+<td style="text-align:left">Catálogo · Login · Checkout · Envio · Dependências · Protocolos</td>
+</tr>
+<tr>
+<td style="text-align:center"><a href="#diagrama-4--deployment-kubernetes">4</a></td>
+<td style="text-align:left"><strong>Deployment Kubernetes</strong></td>
+<td style="text-align:left">Cluster · HPA · Segurança · CI/CD · Observabilidade · Recursos</td>
+</tr>
+<tr>
+<td style="text-align:center"><a href="#diagrama-5--resultados-dos-testes-de-escalabilidade-cenário-c1">5</a></td>
+<td style="text-align:left"><strong>Resultados dos Testes de Escalabilidade — Cenário C1</strong></td>
+<td style="text-align:left">Progressão de carga · Ponto de quebra · Latência por endpoint · Conclusões</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<hr>
+<h1 id="diagrama-1--visão-geral-da-arquitetura-de-microserviços">Diagrama 1 — Visão Geral da Arquitetura de Microserviços </h1>
+<blockquote>
+<p>Visão de alto nível da aplicação <strong>Online Boutique</strong>, organizada em quatro camadas: <strong>Edge</strong>, <strong>Apresentação</strong>, <strong>Negócio</strong> e <strong>Dados</strong>.</p>
+</blockquote>
+<hr>
+<div class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#546E7A', 'fontSize': '14px'}}}%%
+flowchart LR
+    classDef actor    fill:#BBDEFB,stroke:#1565C0,stroke-width:2px,color:#0D0D0D
+    classDef gateway  fill:#FFCDD2,stroke:#C62828,stroke-width:2px,color:#0D0D0D,font-weight:bold
+    classDef frontend fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px,color:#0D0D0D,font-weight:bold
+    classDef service  fill:#C5CAE9,stroke:#283593,stroke-width:1.5px,color:#0D0D0D
+    classDef sqldb    fill:#B2DFDB,stroke:#00695C,stroke-width:1.5px,color:#0D0D0D
+    classDef nosqldb  fill:#FFE0B2,stroke:#E65100,stroke-width:1.5px,color:#0D0D0D
+    classDef cache    fill:#FFCCBC,stroke:#BF360C,stroke-width:1.5px,color:#0D0D0D
+    classDef broker   fill:#E1BEE7,stroke:#6A1B9A,stroke-width:1.5px,color:#0D0D0D
+
+    Actor(["Utilizador&lt;br/&gt;Browser"]):::actor
+
+    subgraph EDGE["  Edge Layer  "]
+        EdgeRouter["edge-router&lt;br/&gt;Nginx · :80"]:::gateway
+    end
+
+    subgraph FRONTEND["  Presentation Layer  "]
+        FrontEnd["front-end&lt;br/&gt;Node.js · :8079"]:::frontend
+    end
+
+    subgraph SERVICES["  Business Services  "]
+        direction TB
+        Catalogue["catalogue&lt;br/&gt;Go"]:::service
+        Carts["carts&lt;br/&gt;Java Spring"]:::service
+        Orders["orders&lt;br/&gt;Java Spring"]:::service
+        Payment["payment&lt;br/&gt;Go"]:::service
+        Shipping["shipping&lt;br/&gt;Java Spring"]:::service
+        UserSvc["user&lt;br/&gt;Go"]:::service
+        QueueMaster["queue-master&lt;br/&gt;Java Spring"]:::service
+    end
+
+    subgraph DATA["  Data Layer  "]
+        direction TB
+        CatalogueDB[("catalogue-db&lt;br/&gt;MySQL · :3306")]:::sqldb
+        CartsDB[("carts-db&lt;br/&gt;MongoDB · :27017")]:::nosqldb
+        OrdersDB[("orders-db&lt;br/&gt;MongoDB · :27017")]:::nosqldb
+        UserDB[("user-db&lt;br/&gt;MongoDB · :27017")]:::nosqldb
+        SessionDB[("session-db&lt;br/&gt;Redis · :6379")]:::cache
+        RabbitMQ[("rabbitmq&lt;br/&gt;AMQP · :5672")]:::broker
+    end
+
+    Actor            --&gt;|"HTTP :80"| EdgeRouter
+    EdgeRouter       --&gt; FrontEnd
+
+    FrontEnd         --&gt; Catalogue
+    FrontEnd         --&gt; Carts
+    FrontEnd         --&gt; Orders
+    FrontEnd         --&gt; UserSvc
+    FrontEnd         --&gt;|"Session"| SessionDB
+
+    Orders           --&gt;|"REST"| Payment
+    Orders           --&gt;|"REST"| Shipping
+    Orders           --&gt;|"REST"| UserSvc
+
+    Shipping         --&gt;|"AMQP Publish"| RabbitMQ
+    RabbitMQ         --&gt;|"AMQP Consume"| QueueMaster
+
+    Catalogue        --&gt; CatalogueDB
+    Carts            --&gt; CartsDB
+    Orders           --&gt; OrdersDB
+    UserSvc          --&gt; UserDB
+
+    style EDGE       fill:#FFFDE7,stroke:#F9A825,stroke-width:1.5px,stroke-dasharray:6 3
+    style FRONTEND   fill:#F1F8E9,stroke:#558B2F,stroke-width:1.5px,stroke-dasharray:6 3
+    style SERVICES   fill:#E8EAF6,stroke:#3949AB,stroke-width:1.5px,stroke-dasharray:6 3
+    style DATA       fill:#FFF8E1,stroke:#F57F17,stroke-width:1.5px,stroke-dasharray:6 3
+</div><h3 id="legenda-de-camadas">Legenda de Camadas </h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Camada</th>
+<th style="text-align:center">Cor</th>
+<th style="text-align:left">Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Utilizador</td>
+<td style="text-align:center">Azul claro</td>
+<td style="text-align:left">Ponto de entrada externo — browser do cliente</td>
+</tr>
+<tr>
+<td style="text-align:left">Edge Layer</td>
+<td style="text-align:center">Vermelho claro</td>
+<td style="text-align:left">API Gateway (Nginx) — único ponto de entrada no cluster</td>
+</tr>
+<tr>
+<td style="text-align:left">Presentation Layer</td>
+<td style="text-align:center">Verde claro</td>
+<td style="text-align:left">Frontend Node.js — renderização server-side (SSR)</td>
+</tr>
+<tr>
+<td style="text-align:left">Business Services</td>
+<td style="text-align:center">Azul médio</td>
+<td style="text-align:left">Microserviços de domínio (Go / Java Spring Boot)</td>
+</tr>
+<tr>
+<td style="text-align:left">Data Layer — SQL</td>
+<td style="text-align:center">Verde-azulado</td>
+<td style="text-align:left">MySQL — dados estruturados e relacionais</td>
+</tr>
+<tr>
+<td style="text-align:left">Data Layer — NoSQL</td>
+<td style="text-align:center">Âmbar</td>
+<td style="text-align:left">MongoDB — documentos sem schema fixo</td>
+</tr>
+<tr>
+<td style="text-align:left">Data Layer — Cache</td>
+<td style="text-align:center">Laranja</td>
+<td style="text-align:left">Redis — sessões com TTL automático</td>
+</tr>
+<tr>
+<td style="text-align:left">Message Broker</td>
+<td style="text-align:center">Roxo</td>
+<td style="text-align:left">RabbitMQ — mensageria assíncrona (AMQP)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="inventário-de-serviços">Inventário de Serviços </h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Serviço</th>
+<th style="text-align:center">Tecnologia</th>
+<th style="text-align:center">Porta</th>
+<th style="text-align:left">Responsabilidade</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">edge-router</td>
+<td style="text-align:center">Nginx</td>
+<td style="text-align:center">80</td>
+<td style="text-align:left">Reverse proxy / API Gateway</td>
+</tr>
+<tr>
+<td style="text-align:left">front-end</td>
+<td style="text-align:center">Node.js</td>
+<td style="text-align:center">8079</td>
+<td style="text-align:left">Interface do utilizador (SSR)</td>
+</tr>
+<tr>
+<td style="text-align:left">catalogue</td>
+<td style="text-align:center">Go</td>
+<td style="text-align:center">80</td>
+<td style="text-align:left">Catálogo de produtos</td>
+</tr>
+<tr>
+<td style="text-align:left">carts</td>
+<td style="text-align:center">Java Spring Boot</td>
+<td style="text-align:center">80</td>
+<td style="text-align:left">Carrinho de compras</td>
+</tr>
+<tr>
+<td style="text-align:left">orders</td>
+<td style="text-align:center">Java Spring Boot</td>
+<td style="text-align:center">80</td>
+<td style="text-align:left">Gestão de pedidos</td>
+</tr>
+<tr>
+<td style="text-align:left">payment</td>
+<td style="text-align:center">Go</td>
+<td style="text-align:center">80</td>
+<td style="text-align:left">Autorização de pagamentos</td>
+</tr>
+<tr>
+<td style="text-align:left">shipping</td>
+<td style="text-align:center">Java Spring Boot</td>
+<td style="text-align:center">80</td>
+<td style="text-align:left">Gestão de envios</td>
+</tr>
+<tr>
+<td style="text-align:left">user</td>
+<td style="text-align:center">Go</td>
+<td style="text-align:center">80</td>
+<td style="text-align:left">Gestão de utilizadores</td>
+</tr>
+<tr>
+<td style="text-align:left">queue-master</td>
+<td style="text-align:center">Java Spring Boot</td>
+<td style="text-align:center">80</td>
+<td style="text-align:left">Consumidor de filas de mensagens</td>
+</tr>
+<tr>
+<td style="text-align:left">rabbitmq</td>
+<td style="text-align:center">RabbitMQ</td>
+<td style="text-align:center">5672</td>
+<td style="text-align:left">Message Broker (AMQP)</td>
+</tr>
+<tr>
+<td style="text-align:left">catalogue-db</td>
+<td style="text-align:center">MySQL</td>
+<td style="text-align:center">3306</td>
+<td style="text-align:left">Persistência relacional</td>
+</tr>
+<tr>
+<td style="text-align:left">carts-db</td>
+<td style="text-align:center">MongoDB</td>
+<td style="text-align:center">27017</td>
+<td style="text-align:left">Persistência documental</td>
+</tr>
+<tr>
+<td style="text-align:left">orders-db</td>
+<td style="text-align:center">MongoDB</td>
+<td style="text-align:center">27017</td>
+<td style="text-align:left">Persistência documental</td>
+</tr>
+<tr>
+<td style="text-align:left">user-db</td>
+<td style="text-align:center">MongoDB</td>
+<td style="text-align:center">27017</td>
+<td style="text-align:left">Persistência documental</td>
+</tr>
+<tr>
+<td style="text-align:left">session-db</td>
+<td style="text-align:center">Redis</td>
+<td style="text-align:center">6379</td>
+<td style="text-align:left">Cache de sessões</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<hr>
+<h1 id="diagrama-2--bases-de-dados-e-polyglot-persistence">Diagrama 2 — Bases de Dados e Polyglot Persistence </h1>
+<blockquote>
+<p>Ilustra a estratégia <strong>Database-per-Service</strong>: cada microserviço possui a sua própria base de dados, isolada e escolhida em função dos requisitos de acesso e modelo de dados.</p>
+</blockquote>
+<hr>
+<h2 id="21--mapeamento-serviço--base-de-dados">2.1 — Mapeamento Serviço → Base de Dados </h2>
+<div style="overflow-x:auto;margin:16px 0;">
+<table style="border-collapse:collapse;width:100%;font-size:13px;font-family:inherit;">
+  <thead>
+    <tr style="background:#37474F;color:#fff;">
+      <th style="padding:8px 12px;text-align:left;border:1px solid #546E7A;">Serviço</th>
+      <th style="padding:8px 12px;text-align:left;border:1px solid #546E7A;">Linguagem</th>
+      <th style="padding:8px 12px;text-align:center;border:1px solid #546E7A;">Protocolo</th>
+      <th style="padding:8px 12px;text-align:left;border:1px solid #546E7A;">Base de Dados</th>
+      <th style="padding:8px 12px;text-align:center;border:1px solid #546E7A;">Tipo</th>
+      <th style="padding:8px 12px;text-align:center;border:1px solid #546E7A;">Porta</th>
+      <th style="padding:8px 12px;text-align:left;border:1px solid #546E7A;">Colecções / Tabelas</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="background:#E8EAF6;">
+      <td style="padding:7px 12px;border:1px solid #C5CAE9;font-weight:bold;">catalogue</td>
+      <td style="padding:7px 12px;border:1px solid #C5CAE9;">Go</td>
+      <td style="padding:7px 12px;border:1px solid #C5CAE9;text-align:center;"><span style="background:#B2DFDB;color:#00695C;padding:2px 7px;border-radius:4px;font-weight:bold;font-size:11px;">SQL</span></td>
+      <td style="padding:7px 12px;border:1px solid #C5CAE9;">catalogue-db</td>
+      <td style="padding:7px 12px;border:1px solid #C5CAE9;text-align:center;"><span style="background:#B2DFDB;color:#00695C;padding:2px 7px;border-radius:4px;font-size:11px;">MySQL</span></td>
+      <td style="padding:7px 12px;border:1px solid #C5CAE9;text-align:center;">3306</td>
+      <td style="padding:7px 12px;border:1px solid #C5CAE9;font-size:12px;color:#555;">sock · tag · sock_tag · sock_image</td>
+    </tr>
+    <tr style="background:#FFF8E1;">
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;font-weight:bold;">carts</td>
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;">Java Spring</td>
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;text-align:center;"><span style="background:#FFE0B2;color:#E65100;padding:2px 7px;border-radius:4px;font-weight:bold;font-size:11px;">NoSQL</span></td>
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;">carts-db</td>
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;text-align:center;"><span style="background:#FFE0B2;color:#E65100;padding:2px 7px;border-radius:4px;font-size:11px;">MongoDB</span></td>
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;text-align:center;">27017</td>
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;font-size:12px;color:#555;">cart · item</td>
+    </tr>
+    <tr style="background:#FFF8E1;">
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;font-weight:bold;">orders</td>
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;">Java Spring</td>
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;text-align:center;"><span style="background:#FFE0B2;color:#E65100;padding:2px 7px;border-radius:4px;font-weight:bold;font-size:11px;">NoSQL</span></td>
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;">orders-db</td>
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;text-align:center;"><span style="background:#FFE0B2;color:#E65100;padding:2px 7px;border-radius:4px;font-size:11px;">MongoDB</span></td>
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;text-align:center;">27017</td>
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;font-size:12px;color:#555;">customerOrder · address · card</td>
+    </tr>
+    <tr style="background:#FFF8E1;">
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;font-weight:bold;">user</td>
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;">Go</td>
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;text-align:center;"><span style="background:#FFE0B2;color:#E65100;padding:2px 7px;border-radius:4px;font-weight:bold;font-size:11px;">NoSQL</span></td>
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;">user-db</td>
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;text-align:center;"><span style="background:#FFE0B2;color:#E65100;padding:2px 7px;border-radius:4px;font-size:11px;">MongoDB</span></td>
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;text-align:center;">27017</td>
+      <td style="padding:7px 12px;border:1px solid #FFE0B2;font-size:12px;color:#555;">customers · addresses · cards</td>
+    </tr>
+    <tr style="background:#FBE9E7;">
+      <td style="padding:7px 12px;border:1px solid #FFCCBC;font-weight:bold;">front-end</td>
+      <td style="padding:7px 12px;border:1px solid #FFCCBC;">Node.js</td>
+      <td style="padding:7px 12px;border:1px solid #FFCCBC;text-align:center;"><span style="background:#FFCCBC;color:#BF360C;padding:2px 7px;border-radius:4px;font-weight:bold;font-size:11px;">Redis</span></td>
+      <td style="padding:7px 12px;border:1px solid #FFCCBC;">session-db</td>
+      <td style="padding:7px 12px;border:1px solid #FFCCBC;text-align:center;"><span style="background:#FFCCBC;color:#BF360C;padding:2px 7px;border-radius:4px;font-size:11px;">Redis</span></td>
+      <td style="padding:7px 12px;border:1px solid #FFCCBC;text-align:center;">6379</td>
+      <td style="padding:7px 12px;border:1px solid #FFCCBC;font-size:12px;color:#555;">KEY: session:{id} · TTL: 1 800 s</td>
+    </tr>
+    <tr style="background:#F3E5F5;">
+      <td style="padding:7px 12px;border:1px solid #E1BEE7;font-weight:bold;">shipping</td>
+      <td style="padding:7px 12px;border:1px solid #E1BEE7;">Java Spring</td>
+      <td style="padding:7px 12px;border:1px solid #E1BEE7;text-align:center;"><span style="background:#E1BEE7;color:#6A1B9A;padding:2px 7px;border-radius:4px;font-weight:bold;font-size:11px;">AMQP Publish</span></td>
+      <td style="padding:7px 12px;border:1px solid #E1BEE7;">rabbitmq</td>
+      <td style="padding:7px 12px;border:1px solid #E1BEE7;text-align:center;"><span style="background:#E1BEE7;color:#6A1B9A;padding:2px 7px;border-radius:4px;font-size:11px;">RabbitMQ</span></td>
+      <td style="padding:7px 12px;border:1px solid #E1BEE7;text-align:center;">5672</td>
+      <td style="padding:7px 12px;border:1px solid #E1BEE7;font-size:12px;color:#555;">Queue: shipping-task</td>
+    </tr>
+    <tr style="background:#F3E5F5;">
+      <td style="padding:7px 12px;border:1px solid #E1BEE7;font-weight:bold;">queue-master</td>
+      <td style="padding:7px 12px;border:1px solid #E1BEE7;">Java Spring</td>
+      <td style="padding:7px 12px;border:1px solid #E1BEE7;text-align:center;"><span style="background:#E1BEE7;color:#6A1B9A;padding:2px 7px;border-radius:4px;font-weight:bold;font-size:11px;">AMQP Consume</span></td>
+      <td style="padding:7px 12px;border:1px solid #E1BEE7;">rabbitmq</td>
+      <td style="padding:7px 12px;border:1px solid #E1BEE7;text-align:center;"><span style="background:#E1BEE7;color:#6A1B9A;padding:2px 7px;border-radius:4px;font-size:11px;">RabbitMQ</span></td>
+      <td style="padding:7px 12px;border:1px solid #E1BEE7;text-align:center;">5672</td>
+      <td style="padding:7px 12px;border:1px solid #E1BEE7;font-size:12px;color:#555;">Queue: shipping-task</td>
+    </tr>
+  </tbody>
+</table>
+</div><hr>
+<h2 id="22--padrão-database-per-service-vs-base-de-dados-partilhada">2.2 — Padrão: Database-per-Service vs. Base de Dados Partilhada </h2>
+<div class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#546E7A', 'fontSize': '14px'}}}%%
+flowchart LR
+    classDef bad      fill:#FFCDD2,stroke:#C62828,stroke-width:2px,color:#0D0D0D
+    classDef baddb    fill:#EF9A9A,stroke:#B71C1C,stroke-width:2px,color:#0D0D0D
+    classDef good     fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px,color:#0D0D0D
+    classDef goodsql  fill:#B2DFDB,stroke:#00695C,stroke-width:2px,color:#0D0D0D
+    classDef goodnosql fill:#FFE0B2,stroke:#E65100,stroke-width:2px,color:#0D0D0D
+
+    subgraph BAD["  Anti-Pattern — Shared Database  "]
+        direction TB
+        S1["Serviço A"]:::bad
+        S2["Serviço B"]:::bad
+        S3["Serviço C"]:::bad
+        SharedDB[("Base de Dados&lt;br/&gt;Partilhada")]:::baddb
+        S1 --&gt; SharedDB
+        S2 --&gt; SharedDB
+        S3 --&gt; SharedDB
+    end
+
+    subgraph GOOD["  Pattern Aplicado — Database-per-Service  "]
+        direction TB
+        SvcA["catalogue"]:::good
+        SvcB["carts"]:::good
+        SvcC["orders"]:::good
+        DBA[("MySQL")]:::goodsql
+        DBB[("MongoDB")]:::goodnosql
+        DBC[("MongoDB")]:::goodnosql
+        SvcA --&gt; DBA
+        SvcB --&gt; DBB
+        SvcC --&gt; DBC
+    end
+
+    style BAD  fill:#FFEBEE,stroke:#C62828,stroke-width:2px,stroke-dasharray:6 3
+    style GOOD fill:#F1F8E9,stroke:#2E7D32,stroke-width:2px,stroke-dasharray:6 3
+</div><hr>
+<h2 id="23--tecnologias-de-persistência-e-justificação">2.3 — Tecnologias de Persistência e Justificação </h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Base de Dados</th>
+<th style="text-align:center">Tipo</th>
+<th style="text-align:center">Serviço</th>
+<th style="text-align:left">Justificação Técnica</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>MySQL</strong></td>
+<td style="text-align:center">Relacional (SQL)</td>
+<td style="text-align:center">catalogue-db</td>
+<td style="text-align:left">Dados estruturados com relações entre entidades (produto ↔ tag ↔ imagem)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>MongoDB</strong></td>
+<td style="text-align:center">Documental (NoSQL)</td>
+<td style="text-align:center">carts-db</td>
+<td style="text-align:left">Documento flexível — lista dinâmica de itens sem schema fixo</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>MongoDB</strong></td>
+<td style="text-align:center">Documental (NoSQL)</td>
+<td style="text-align:center">orders-db</td>
+<td style="text-align:left">Agrega morada, cartão e itens num único documento aninhado</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>MongoDB</strong></td>
+<td style="text-align:center">Documental (NoSQL)</td>
+<td style="text-align:center">user-db</td>
+<td style="text-align:left">Perfil de utilizador com arrays embutidos de moradas e cartões</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Redis</strong></td>
+<td style="text-align:center">Key-Value / Cache</td>
+<td style="text-align:center">session-db</td>
+<td style="text-align:left">Latência &lt; 1 ms, TTL automático, stateless entre múltiplos pods</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>RabbitMQ</strong></td>
+<td style="text-align:center">Message Queue</td>
+<td style="text-align:center">shipping</td>
+<td style="text-align:left">Desacopla <code>orders</code> de <code>shipping</code> e garante entrega assíncrona</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<hr>
+<h1 id="diagrama-3--fluxos-de-comunicação">Diagrama 3 — Fluxos de Comunicação </h1>
+<blockquote>
+<p>Sequence diagrams dos principais fluxos de negócio e mapa de dependências entre serviços. As setas sólidas (→) representam chamadas síncronas; as tracejadas (⇢) representam respostas ou mensagens assíncronas.</p>
+</blockquote>
+<hr>
+<h2 id="31--consulta-de-catálogo">3.1 — Consulta de Catálogo </h2>
+<div class="mermaid">sequenceDiagram
+    autonumber
+    actor U as Utilizador
+    participant ER as edge-router&lt;br/&gt;(Nginx)
+    participant FE as front-end&lt;br/&gt;(Node.js)
+    participant CAT as catalogue&lt;br/&gt;(Go)
+    participant CDB as catalogue-db&lt;br/&gt;(MySQL)
+
+    U  -&gt;&gt;+ ER:  GET /catalogue
+    ER -&gt;&gt;+ FE:  Proxy HTTP
+    FE -&gt;&gt;+ CAT: GET /catalogue?page=1&amp;size=6
+    CAT -&gt;&gt;+ CDB: SELECT sock, tag FROM sock JOIN sock_tag
+    CDB --&gt;&gt;- CAT: Rows — lista de produtos
+    CAT --&gt;&gt;- FE:  200 OK — JSON Array
+    FE  --&gt;&gt;- ER:  HTML renderizado (SSR)
+    ER  --&gt;&gt;- U:   Página de catálogo
+</div><hr>
+<h2 id="32--login-e-criação-de-sessão">3.2 — Login e Criação de Sessão </h2>
+<div class="mermaid">sequenceDiagram
+    autonumber
+    actor U as Utilizador
+    participant FE  as front-end&lt;br/&gt;(Node.js)
+    participant USR as user&lt;br/&gt;(Go)
+    participant UDB as user-db&lt;br/&gt;(MongoDB)
+    participant SDB as session-db&lt;br/&gt;(Redis)
+
+    U   -&gt;&gt;+ FE:  POST /login {username, password}
+    FE  -&gt;&gt;+ USR: GET /login  (Basic Auth)
+    USR -&gt;&gt;+ UDB: db.customers.findOne({username})
+    UDB --&gt;&gt;- USR: Customer Document
+    USR --&gt;&gt;- FE:  200 OK — {user_id}
+
+    rect rgb(232, 245, 233)
+        Note over FE,SDB: Criação de sessão no Redis
+        FE  -&gt;&gt;+ SDB: SET session:{uuid} {user_id} EX 1800
+        SDB --&gt;&gt;- FE:  OK
+    end
+
+    FE  --&gt;&gt;- U: 200 OK — Set-Cookie: session={uuid}
+</div><hr>
+<h2 id="33--checkout-e-criação-de-pedido">3.3 — Checkout e Criação de Pedido </h2>
+<div class="mermaid">sequenceDiagram
+    autonumber
+    actor U as Utilizador
+    participant FE   as front-end&lt;br/&gt;(Node.js)
+    participant ORD  as orders&lt;br/&gt;(Java Spring)
+    participant USR  as user&lt;br/&gt;(Go)
+    participant CART as carts&lt;br/&gt;(Java Spring)
+    participant PAY  as payment&lt;br/&gt;(Go)
+    participant ODB  as orders-db&lt;br/&gt;(MongoDB)
+
+    U   -&gt;&gt;+ FE:  POST /orders
+    FE  -&gt;&gt;+ ORD: POST /orders {session}
+
+    rect rgb(232, 240, 254)
+        Note over ORD,CART: Recolha de dados em paralelo
+        par Obter perfil de utilizador
+            ORD -&gt;&gt;+ USR:  GET /customers/{id}
+            USR --&gt;&gt;- ORD: {address, card}
+        and Obter carrinho
+            ORD -&gt;&gt;+ CART: GET /carts/{id}
+            CART --&gt;&gt;- ORD: {items, total}
+        end
+    end
+
+    ORD -&gt;&gt;+ PAY: POST /paymentAuth {amount, card}
+    PAY --&gt;&gt;- ORD: {authorised: true}
+
+    ORD -&gt;&gt;+ ODB: insertOne(customerOrder)
+    ODB --&gt;&gt;- ORD: {order_id}
+
+    ORD --&gt;&gt;- FE: 201 Created — {order_id}
+    FE  --&gt;&gt;- U:  Pedido confirmado
+</div><hr>
+<h2 id="34--processamento-de-envio-assíncrono">3.4 — Processamento de Envio (Assíncrono) </h2>
+<div class="mermaid">sequenceDiagram
+    autonumber
+    participant ORD  as orders&lt;br/&gt;(Java Spring)
+    participant SHIP as shipping&lt;br/&gt;(Java Spring)
+    participant RMQ  as rabbitmq&lt;br/&gt;(AMQP)
+    participant QM   as queue-master&lt;br/&gt;(Java Spring)
+
+    ORD  -&gt;&gt;+ SHIP: POST /shipping {order_id, address}
+
+    rect rgb(243, 229, 245)
+        Note over SHIP,RMQ: Publicação assíncrona na fila
+        SHIP -&gt;&gt;+ RMQ: AMQP Publish → queue: shipping-task
+        RMQ  --&gt;&gt;- SHIP: Ack — mensagem persistida
+    end
+
+    SHIP --&gt;&gt;- ORD: 201 Accepted
+
+    Note over RMQ,QM: Processamento em background (fire-and-forget)
+
+    rect rgb(232, 234, 246)
+        RMQ -&gt;&gt;+ QM: Deliver mensagem
+        QM  -&gt;&gt;  QM: Processar envio
+        QM  --&gt;&gt;- RMQ: BasicAck
+    end
+</div><hr>
+<h2 id="35--mapa-de-dependências-entre-serviços">3.5 — Mapa de Dependências entre Serviços </h2>
+<div class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#546E7A', 'fontSize': '14px'}}}%%
+flowchart LR
+    classDef frontend fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px,color:#0D0D0D,font-weight:bold
+    classDef service  fill:#C5CAE9,stroke:#283593,stroke-width:1.5px,color:#0D0D0D
+    classDef cache    fill:#FFCCBC,stroke:#BF360C,stroke-width:1.5px,color:#0D0D0D
+    classDef broker   fill:#E1BEE7,stroke:#6A1B9A,stroke-width:1.5px,color:#0D0D0D
+
+    FE["front-end"]:::frontend
+    CAT["catalogue"]:::service
+    CART["carts"]:::service
+    ORD["orders"]:::service
+    PAY["payment"]:::service
+    SHIP["shipping"]:::service
+    USR["user"]:::service
+    QM["queue-master"]:::service
+    SDB[("session-db&lt;br/&gt;Redis")]:::cache
+    RMQ[("rabbitmq&lt;br/&gt;AMQP")]:::broker
+
+    FE   --&gt;|"REST"| CAT
+    FE   --&gt;|"REST"| CART
+    FE   --&gt;|"REST"| ORD
+    FE   --&gt;|"REST"| USR
+    FE   --&gt;|"Redis"| SDB
+
+    ORD  --&gt;|"REST"| PAY
+    ORD  --&gt;|"REST"| SHIP
+    ORD  --&gt;|"REST"| USR
+
+    SHIP --&gt;|"AMQP Publish"| RMQ
+    QM   --&gt;|"AMQP Consume"| RMQ
+</div><hr>
+<h2 id="36--protocolo-e-tipo-de-comunicação-por-par-de-serviços">3.6 — Protocolo e Tipo de Comunicação por Par de Serviços </h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Origem</th>
+<th style="text-align:left">Destino</th>
+<th style="text-align:center">Protocolo</th>
+<th style="text-align:center">Tipo</th>
+<th style="text-align:left">Justificação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">edge-router</td>
+<td style="text-align:left">front-end</td>
+<td style="text-align:center">HTTP</td>
+<td style="text-align:center">Síncrono</td>
+<td style="text-align:left">Reverse proxy</td>
+</tr>
+<tr>
+<td style="text-align:left">front-end</td>
+<td style="text-align:left">catalogue</td>
+<td style="text-align:center">REST / HTTP</td>
+<td style="text-align:center">Síncrono</td>
+<td style="text-align:left">Resposta imediata necessária para renderização</td>
+</tr>
+<tr>
+<td style="text-align:left">front-end</td>
+<td style="text-align:left">carts</td>
+<td style="text-align:center">REST / HTTP</td>
+<td style="text-align:center">Síncrono</td>
+<td style="text-align:left">Resposta imediata necessária para renderização</td>
+</tr>
+<tr>
+<td style="text-align:left">front-end</td>
+<td style="text-align:left">orders</td>
+<td style="text-align:center">REST / HTTP</td>
+<td style="text-align:center">Síncrono</td>
+<td style="text-align:left">Resposta imediata necessária para renderização</td>
+</tr>
+<tr>
+<td style="text-align:left">front-end</td>
+<td style="text-align:left">user</td>
+<td style="text-align:center">REST / HTTP</td>
+<td style="text-align:center">Síncrono</td>
+<td style="text-align:left">Resposta imediata necessária para renderização</td>
+</tr>
+<tr>
+<td style="text-align:left">front-end</td>
+<td style="text-align:left">session-db</td>
+<td style="text-align:center">Redis Protocol</td>
+<td style="text-align:center">Síncrono</td>
+<td style="text-align:left">Cache — latência &lt; 1 ms</td>
+</tr>
+<tr>
+<td style="text-align:left">orders</td>
+<td style="text-align:left">payment</td>
+<td style="text-align:center">REST / HTTP</td>
+<td style="text-align:center">Síncrono</td>
+<td style="text-align:left">Autorização obrigatória antes de confirmar pedido</td>
+</tr>
+<tr>
+<td style="text-align:left">orders</td>
+<td style="text-align:left">shipping</td>
+<td style="text-align:center">REST / HTTP</td>
+<td style="text-align:center">Síncrono</td>
+<td style="text-align:left">Iniciação do processo de envio</td>
+</tr>
+<tr>
+<td style="text-align:left">shipping</td>
+<td style="text-align:left">rabbitmq</td>
+<td style="text-align:center">AMQP</td>
+<td style="text-align:center"><strong>Assíncrono</strong></td>
+<td style="text-align:left">Fire-and-forget — não bloqueia o utilizador</td>
+</tr>
+<tr>
+<td style="text-align:left">queue-master</td>
+<td style="text-align:left">rabbitmq</td>
+<td style="text-align:center">AMQP</td>
+<td style="text-align:center"><strong>Assíncrono</strong></td>
+<td style="text-align:left">Consume e processa em background</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<hr>
+<h1 id="diagrama-4--deployment-kubernetes">Diagrama 4 — Deployment Kubernetes </h1>
+<blockquote>
+<p>Visão do deployment da aplicação em Kubernetes: estrutura do cluster, autoscaling horizontal, contexto de segurança dos pods, pipeline CI/CD e stack de observabilidade.</p>
+</blockquote>
+<hr>
+<h2 id="41--visão-geral-do-cluster">4.1 — Visão Geral do Cluster </h2>
+<div class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#546E7A', 'fontSize': '14px'}}}%%
+flowchart TD
+    classDef internet fill:#BBDEFB,stroke:#1565C0,stroke-width:2px,color:#0D0D0D
+    classDef gateway  fill:#FFCDD2,stroke:#C62828,stroke-width:2px,color:#0D0D0D,font-weight:bold
+    classDef frontend fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px,color:#0D0D0D,font-weight:bold
+    classDef service  fill:#C5CAE9,stroke:#283593,stroke-width:1.5px,color:#0D0D0D
+    classDef sqldb    fill:#B2DFDB,stroke:#00695C,stroke-width:1.5px,color:#0D0D0D
+    classDef nosqldb  fill:#FFE0B2,stroke:#E65100,stroke-width:1.5px,color:#0D0D0D
+    classDef cache    fill:#FFCCBC,stroke:#BF360C,stroke-width:1.5px,color:#0D0D0D
+    classDef broker   fill:#E1BEE7,stroke:#6A1B9A,stroke-width:1.5px,color:#0D0D0D
+
+    Internet(["Utilizador&lt;br/&gt;Internet"]):::internet
+
+    subgraph INGRESS["  K8S — Ingress  "]
+        ER["edge-router&lt;br/&gt;NodePort :80 — Nginx"]:::gateway
+    end
+
+    subgraph PRES["  K8S — Presentation  "]
+        FE["front-end&lt;br/&gt;1 réplica · 300m CPU · 1000Mi RAM"]:::frontend
+    end
+
+    subgraph BIZ["  K8S — Business Services  "]
+        direction LR
+        CAT["catalogue&lt;br/&gt;1 réplica · 200m · 200Mi"]:::service
+        CART["carts&lt;br/&gt;HPA max 10 · 300m · 500Mi"]:::service
+        ORD["orders&lt;br/&gt;1 réplica · 500m · 500Mi"]:::service
+        PAY["payment&lt;br/&gt;1 réplica · 200m · 200Mi"]:::service
+        SHIP["shipping&lt;br/&gt;1 réplica · 300m · 500Mi"]:::service
+        USR["user&lt;br/&gt;1 réplica · 300m · 200Mi"]:::service
+        QM["queue-master&lt;br/&gt;1 réplica · 300m · 500Mi"]:::service
+    end
+
+    subgraph DATASTORES["  K8S — Data Stores  "]
+        direction LR
+        SDB[("session-db&lt;br/&gt;Redis :6379")]:::cache
+        RMQ[("rabbitmq&lt;br/&gt;AMQP :5672")]:::broker
+        CATDB[("catalogue-db&lt;br/&gt;MySQL :3306")]:::sqldb
+        CARTDB[("carts-db&lt;br/&gt;MongoDB :27017")]:::nosqldb
+        ORDDB[("orders-db&lt;br/&gt;MongoDB :27017")]:::nosqldb
+        USRDB[("user-db&lt;br/&gt;MongoDB :27017")]:::nosqldb
+    end
+
+    Internet --&gt; ER
+    ER        --&gt; FE
+
+    FE --&gt; CAT
+    FE --&gt; CART
+    FE --&gt; ORD
+    FE --&gt; USR
+    FE --&gt; SDB
+
+    ORD  --&gt; PAY
+    ORD  --&gt; SHIP
+    ORD  --&gt; USR
+    SHIP --&gt; RMQ
+    QM   --&gt; RMQ
+
+    CAT  --&gt; CATDB
+    CART --&gt; CARTDB
+    ORD  --&gt; ORDDB
+    USR  --&gt; USRDB
+
+    style INGRESS    fill:#FFFDE7,stroke:#F9A825,stroke-width:1.5px,stroke-dasharray:5 3
+    style PRES       fill:#F1F8E9,stroke:#558B2F,stroke-width:1.5px,stroke-dasharray:5 3
+    style BIZ        fill:#E8EAF6,stroke:#3949AB,stroke-width:1.5px,stroke-dasharray:5 3
+    style DATASTORES fill:#FFF8E1,stroke:#F57F17,stroke-width:1.5px,stroke-dasharray:5 3
+</div><hr>
+<h2 id="42--horizontal-pod-autoscaling-hpa">4.2 — Horizontal Pod Autoscaling (HPA) </h2>
+<div class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#546E7A', 'fontSize': '14px'}}}%%
+flowchart LR
+    classDef monitor fill:#FFE0B2,stroke:#E65100,stroke-width:2px,color:#0D0D0D,font-weight:bold
+    classDef target  fill:#C5CAE9,stroke:#283593,stroke-width:2px,color:#0D0D0D
+    classDef scaleup fill:#C8E6C9,stroke:#2E7D32,stroke-width:1.5px,color:#0D0D0D
+    classDef scaledn fill:#FFCDD2,stroke:#C62828,stroke-width:1.5px,color:#0D0D0D
+    classDef pod     fill:#E8EAF6,stroke:#283593,stroke-width:1px,color:#0D0D0D
+
+    HPA["HPA Controller&lt;br/&gt;Kubernetes Metrics Server"]:::monitor
+    CART["carts&lt;br/&gt;Deployment"]:::target
+
+    HPA --&gt;|"Monitoriza CPU a cada 15 s"| CART
+
+    CART --&gt;|"CPU &gt; 50%"| SCALEUP["Escala até 10 réplicas"]:::scaleup
+    CART --&gt;|"CPU &lt; 50%"| SCALEDN["Reduz para 1 réplica"]:::scaledn
+
+    SCALEUP --&gt; P1["carts · Pod 1"]:::pod
+    SCALEUP --&gt; P2["carts · Pod 2"]:::pod
+    SCALEUP --&gt; PN["carts · Pod N…"]:::pod
+</div><hr>
+<h2 id="43--contexto-de-segurança-dos-pods">4.3 — Contexto de Segurança dos Pods </h2>
+<div class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#546E7A', 'fontSize': '14px'}}}%%
+flowchart TD
+    classDef pod  fill:#BBDEFB,stroke:#1565C0,stroke-width:2px,color:#0D0D0D,font-weight:bold
+    classDef sec  fill:#FFCDD2,stroke:#C62828,stroke-width:1.5px,color:#0D0D0D
+    classDef vol  fill:#FFE0B2,stroke:#E65100,stroke-width:1.5px,color:#0D0D0D
+
+    POD["Pod Kubernetes"]:::pod
+
+    POD --&gt; SC1["runAsNonRoot: true&lt;br/&gt;runAsUser: 10001"]:::sec
+    POD --&gt; SC2["readOnlyRootFilesystem: true"]:::sec
+    POD --&gt; SC3["capabilities:&lt;br/&gt;  drop: [ ALL ]&lt;br/&gt;  add: [ NET_BIND_SERVICE ]"]:::sec
+    POD --&gt; VOL["volumeMounts: /tmp&lt;br/&gt;emptyDir — armazenamento em RAM"]:::vol
+</div><hr>
+<h2 id="44--pipeline-cicd-github-actions">4.4 — Pipeline CI/CD (GitHub Actions) </h2>
+<div class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#546E7A', 'fontSize': '14px'}}}%%
+flowchart LR
+    classDef trigger fill:#BBDEFB,stroke:#1565C0,stroke-width:2px,color:#0D0D0D
+    classDef step    fill:#C5CAE9,stroke:#283593,stroke-width:1.5px,color:#0D0D0D
+    classDef ok      fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px,color:#0D0D0D,font-weight:bold
+
+    Push(["Git Push&lt;br/&gt;branch / tag"]):::trigger
+
+    Push  --&gt;|"on: push"| Build
+    Build --&gt;|"success"| Check
+    Check --&gt;|"valid"| KIND
+    KIND  --&gt;|"passed"| K8S
+    K8S   --&gt;|"apply"| Staging
+
+    Build["Build Docker Image&lt;br/&gt;docker build + push"]:::step
+    Check["Sync Check&lt;br/&gt;manifests validation"]:::step
+    KIND["Deploy KIND&lt;br/&gt;Kubernetes in Docker"]:::step
+    K8S["kubectl apply&lt;br/&gt;manifests / helm"]:::ok
+    Staging["Staging&lt;br/&gt;AWS EKS / GKE"]:::ok
+</div><hr>
+<h2 id="45--stack-de-observabilidade">4.5 — Stack de Observabilidade </h2>
+<div class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#546E7A', 'fontSize': '14px'}}}%%
+flowchart TD
+    classDef service fill:#C5CAE9,stroke:#283593,stroke-width:1.5px,color:#0D0D0D
+    classDef metrics fill:#FFE0B2,stroke:#E65100,stroke-width:2px,color:#0D0D0D,font-weight:bold
+    classDef viz     fill:#E1BEE7,stroke:#6A1B9A,stroke-width:2px,color:#0D0D0D,font-weight:bold
+    classDef alert   fill:#FFCDD2,stroke:#C62828,stroke-width:1.5px,color:#0D0D0D
+    classDef log     fill:#C5CAE9,stroke:#283593,stroke-width:1.5px,color:#0D0D0D
+    classDef store   fill:#FFE0B2,stroke:#E65100,stroke-width:1.5px,color:#0D0D0D
+
+    subgraph SVCS["  Serviços Instrumentados  "]
+        direction LR
+        CAT["catalogue"]:::service
+        CART["carts"]:::service
+        ORD["orders"]:::service
+        PAY["payment"]:::service
+        SHIP["shipping"]:::service
+        USR["user"]:::service
+    end
+
+    subgraph METRICS["  Métricas (Prometheus Stack)  "]
+        PROM["Prometheus&lt;br/&gt;:9090"]:::metrics
+        GRAF["Grafana&lt;br/&gt;Dashboards · :3000"]:::viz
+        ALERT["AlertManager&lt;br/&gt;:9093"]:::alert
+        PROM --&gt; GRAF
+        PROM --&gt; ALERT
+    end
+
+    subgraph LOGGING["  Logs (EFK Stack)  "]
+        FLU["Fluentd&lt;br/&gt;Log Aggregator"]:::log
+        ES[("Elasticsearch")]:::store
+        KIB["Kibana&lt;br/&gt;:5601"]:::viz
+        FLU --&gt; ES
+        ES  --&gt; KIB
+    end
+
+    CAT  -.-&gt;|"/metrics"| PROM
+    CART -.-&gt;|"/metrics"| PROM
+    ORD  -.-&gt;|"/metrics"| PROM
+    PAY  -.-&gt;|"/metrics"| PROM
+    SHIP -.-&gt;|"/metrics"| PROM
+    USR  -.-&gt;|"/metrics"| PROM
+
+    CAT  -.-&gt;|"logs"| FLU
+    CART -.-&gt;|"logs"| FLU
+    ORD  -.-&gt;|"logs"| FLU
+
+    style SVCS    fill:#E8EAF6,stroke:#3949AB,stroke-width:1.5px,stroke-dasharray:6 3
+    style METRICS fill:#FFF8E1,stroke:#F57F17,stroke-width:1.5px,stroke-dasharray:6 3
+    style LOGGING fill:#F3E5F5,stroke:#6A1B9A,stroke-width:1.5px,stroke-dasharray:6 3
+</div><hr>
+<h2 id="46--recursos-kubernetes-por-serviço">4.6 — Recursos Kubernetes por Serviço </h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Serviço</th>
+<th style="text-align:center">CPU Request</th>
+<th style="text-align:center">CPU Limit</th>
+<th style="text-align:center">Mem Request</th>
+<th style="text-align:center">Mem Limit</th>
+<th style="text-align:center">Réplicas</th>
+<th style="text-align:center">HPA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">front-end</td>
+<td style="text-align:center">100m</td>
+<td style="text-align:center">300m</td>
+<td style="text-align:center">300Mi</td>
+<td style="text-align:center">1000Mi</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td style="text-align:left">catalogue</td>
+<td style="text-align:center">100m</td>
+<td style="text-align:center">200m</td>
+<td style="text-align:center">100Mi</td>
+<td style="text-align:center">200Mi</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td style="text-align:left">carts</td>
+<td style="text-align:center">100m</td>
+<td style="text-align:center">300m</td>
+<td style="text-align:center">200Mi</td>
+<td style="text-align:center">500Mi</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">max 10</td>
+</tr>
+<tr>
+<td style="text-align:left">orders</td>
+<td style="text-align:center">100m</td>
+<td style="text-align:center">500m</td>
+<td style="text-align:center">300Mi</td>
+<td style="text-align:center">500Mi</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td style="text-align:left">payment</td>
+<td style="text-align:center">99m</td>
+<td style="text-align:center">200m</td>
+<td style="text-align:center">100Mi</td>
+<td style="text-align:center">200Mi</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td style="text-align:left">shipping</td>
+<td style="text-align:center">100m</td>
+<td style="text-align:center">300m</td>
+<td style="text-align:center">300Mi</td>
+<td style="text-align:center">500Mi</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td style="text-align:left">user</td>
+<td style="text-align:center">100m</td>
+<td style="text-align:center">300m</td>
+<td style="text-align:center">100Mi</td>
+<td style="text-align:center">200Mi</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">—</td>
+</tr>
+<tr>
+<td style="text-align:left">queue-master</td>
+<td style="text-align:center">100m</td>
+<td style="text-align:center">300m</td>
+<td style="text-align:center">300Mi</td>
+<td style="text-align:center">500Mi</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">—</td>
+</tr>
+</tbody>
+</table>
+
+
+<hr>
+<hr>
+<h1 id="diagrama-5--resultados-dos-testes-de-escalabilidade-cenário-c1">Diagrama 5 — Resultados dos Testes de Escalabilidade — Cenário C1</h1>
+<blockquote>
+<p><strong>Data:</strong> 2026-03-22 · <strong>Cluster:</strong> Docker Desktop / Kubernetes local · <strong>Namespace:</strong> <code>default</code><br>
+<strong>Metodologia:</strong> Escada incremental de 5 em 5 utilizadores (5 → 50), 60 s por step, spawn rate 2 users/s<br>
+<strong>Perfis:</strong> CasualUser (30 %) · NormalUser (50 %) · PowerUser (20 %) — timings naturais e diferenciados<br>
+<strong>Critérios de quebra:</strong> p99 &gt; 2 000 ms <em>ou</em> taxa de falhas &gt; 5 %</p>
+</blockquote>
+<hr>
+<h2 id="51--progressão-de-carga">5.1 — Progressão de Carga</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Utilizadores</th>
+<th style="text-align:center">p50 (ms)</th>
+<th style="text-align:center">p90 (ms)</th>
+<th style="text-align:center">p99 (ms)</th>
+<th style="text-align:center">Falhas</th>
+<th style="text-align:center">Taxa Falhas</th>
+<th style="text-align:center">RPS</th>
+<th style="text-align:center">Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">5</td>
+<td style="text-align:center">25</td>
+<td style="text-align:center">36</td>
+<td style="text-align:center">130</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">0,0 %</td>
+<td style="text-align:center">1,71</td>
+<td style="text-align:center">✅ OK</td>
+</tr>
+<tr>
+<td style="text-align:center">10</td>
+<td style="text-align:center">21</td>
+<td style="text-align:center">36</td>
+<td style="text-align:center">77</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">0,0 %</td>
+<td style="text-align:center">3,41</td>
+<td style="text-align:center">✅ OK</td>
+</tr>
+<tr>
+<td style="text-align:center">15</td>
+<td style="text-align:center">22</td>
+<td style="text-align:center">35</td>
+<td style="text-align:center">120</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">0,0 %</td>
+<td style="text-align:center">4,98</td>
+<td style="text-align:center">✅ OK</td>
+</tr>
+<tr>
+<td style="text-align:center">20</td>
+<td style="text-align:center">26</td>
+<td style="text-align:center">120</td>
+<td style="text-align:center">410</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">0,0 %</td>
+<td style="text-align:center">6,60</td>
+<td style="text-align:center">✅ OK</td>
+</tr>
+<tr>
+<td style="text-align:center">25</td>
+<td style="text-align:center">21</td>
+<td style="text-align:center">65</td>
+<td style="text-align:center">420</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">0,0 %</td>
+<td style="text-align:center">8,35</td>
+<td style="text-align:center">✅ OK</td>
+</tr>
+<tr style="background-color:#FFEBEE;">
+<td style="text-align:center"><strong>30</strong></td>
+<td style="text-align:center"><strong>13</strong></td>
+<td style="text-align:center"><strong>210</strong></td>
+<td style="text-align:center"><strong>910</strong></td>
+<td style="text-align:center"><strong>247</strong></td>
+<td style="text-align:center"><strong>47,6 %</strong></td>
+<td style="text-align:center"><strong>8,79</strong></td>
+<td style="text-align:center">🔴 QUEBRA</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="52--evolução-da-latência">5.2 — Evolução da Latência e Throughput</h2>
+<div class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '14px'}}}%%
+xychart-beta
+    title "Latência por nível de carga (ms)"
+    x-axis ["5u", "10u", "15u", "20u", "25u", "30u ⚠"]
+    y-axis "Latência (ms)" 0 --> 950
+    line [130, 77, 120, 410, 420, 910]
+    line [36, 36, 35, 120, 65, 210]
+    line [25, 21, 22, 26, 21, 13]
+</div>
+<blockquote>
+<p>Linhas (de cima para baixo): <strong>p99</strong> · <strong>p90</strong> · <strong>p50</strong>. O p99 sobe abruptamente de 420 ms (25u) para 910 ms (30u), enquanto o p50 desce de 21 ms para 13 ms — sinal de que os pedidos rápidos são os bem-sucedidos e os lentos resultam em timeout/erro.</p>
+</blockquote>
+<div class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '14px'}}}%%
+xychart-beta
+    title "Throughput (Requests/s)"
+    x-axis ["5u", "10u", "15u", "20u", "25u", "30u ⚠"]
+    y-axis "RPS" 0 --> 10
+    bar [1.71, 3.41, 4.98, 6.60, 8.35, 8.79]
+</div>
+<blockquote>
+<p>O RPS satura a ~8,35 rps entre os 25 e os 30 utilizadores (+0,44 rps de incremento), confirmando que o sistema atingiu o seu limite de saturação nessa gama.</p>
+</blockquote>
+<hr>
+<h2 id="53--ponto-de-quebra-30-utilizadores">5.3 — Ponto de Quebra: 30 Utilizadores</h2>
+<p><strong>Causa:</strong> <code>QUEBRA_FALHAS(47.6%)</code> — 247 de 519 pedidos falharam. O sistema não atingiu o limite de latência (p99 = 910 ms &lt; 2 000 ms), mas a taxa de falhas ultrapassou largamente o limiar de 5 %.</p>
+<h3>Falhas por endpoint a 30 utilizadores</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Endpoint</th>
+<th style="text-align:center">Pedidos</th>
+<th style="text-align:center">Falhas</th>
+<th style="text-align:center">Taxa Falha</th>
+<th style="text-align:center">p50 (ms)</th>
+<th style="text-align:center">p99 (ms)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">GET /product/[id]</td>
+<td style="text-align:center">175</td>
+<td style="text-align:center">94</td>
+<td style="text-align:center">53,7 %</td>
+<td style="text-align:center">9</td>
+<td style="text-align:center">770</td>
+</tr>
+<tr>
+<td style="text-align:left">POST /cart [add]</td>
+<td style="text-align:center">165</td>
+<td style="text-align:center">86</td>
+<td style="text-align:center">52,1 %</td>
+<td style="text-align:center">15</td>
+<td style="text-align:center">700</td>
+</tr>
+<tr>
+<td style="text-align:left">GET /</td>
+<td style="text-align:center">95</td>
+<td style="text-align:center">43</td>
+<td style="text-align:center">45,3 %</td>
+<td style="text-align:center">17</td>
+<td style="text-align:center">960</td>
+</tr>
+<tr>
+<td style="text-align:left">GET /cart</td>
+<td style="text-align:center">38</td>
+<td style="text-align:center">15</td>
+<td style="text-align:center">39,5 %</td>
+<td style="text-align:center">13</td>
+<td style="text-align:center">1 300</td>
+</tr>
+<tr>
+<td style="text-align:left">POST /setCurrency</td>
+<td style="text-align:center">18</td>
+<td style="text-align:center">9</td>
+<td style="text-align:center">50,0 %</td>
+<td style="text-align:center">21</td>
+<td style="text-align:center">240</td>
+</tr>
+<tr>
+<td style="text-align:left">POST /cart/checkout</td>
+<td style="text-align:center">28</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">0,0 %</td>
+<td style="text-align:center">26</td>
+<td style="text-align:center">1 000</td>
+</tr>
+</tbody>
+</table>
+<div class="mermaid">%%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#546E7A', 'fontSize': '14px'}}}%%
+flowchart LR
+    classDef ok     fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px,color:#0D0D0D
+    classDef warn   fill:#FFF9C4,stroke:#F9A825,stroke-width:2px,color:#0D0D0D
+    classDef err    fill:#FFCDD2,stroke:#C62828,stroke-width:2px,color:#0D0D0D,font-weight:bold
+
+    USER(["👤 30 utilizadores<br/>spawn 2/s"])
+
+    FRONT["frontend<br/>GET /"]:::err
+    PROD["productcatalogservice<br/>GET /product/[id]"]:::err
+    CART_A["cartservice<br/>POST /cart [add]"]:::err
+    CART_V["cartservice<br/>GET /cart"]:::err
+    CURR["currencyservice<br/>POST /setCurrency"]:::err
+    CHECK["checkoutservice<br/>POST /cart/checkout"]:::ok
+
+    USER --> FRONT
+    USER --> PROD
+    USER --> CART_A
+    USER --> CART_V
+    USER --> CURR
+    USER --> CHECK
+
+    FRONT  -.-|"45,3% falhas<br/>p99=960ms"| F1((" ")):::err
+    PROD   -.-|"53,7% falhas<br/>p99=770ms"| F2((" ")):::err
+    CART_A -.-|"52,1% falhas<br/>p99=700ms"| F3((" ")):::err
+    CART_V -.-|"39,5% falhas<br/>p99=1300ms"| F4((" ")):::err
+    CURR   -.-|"50,0% falhas<br/>p99=240ms"| F5((" ")):::err
+    CHECK  -.-|"0% falhas<br/>p99=1000ms"| F6((" ")):::ok
+</div>
+<hr>
+<h2 id="54--conclusões">5.4 — Conclusões</h2>
+<ul>
+<li><strong>Capacidade máxima sem degradação:</strong> 25 utilizadores simultâneos (8,35 rps, p99=420 ms, 0 falhas)</li>
+<li><strong>Ponto de quebra:</strong> 30 utilizadores — sistema entra em colapso (47,6 % de falhas)</li>
+<li><strong>Gargalo identificado:</strong> O <code>frontend</code> e o <code>cartservice</code> saturam em simultâneo; o <code>checkoutservice</code> mantém-se estável (0 falhas), o que indica que o bottleneck está no frontend e nas chamadas gRPC ao <code>cartservice</code> / <code>productcatalogservice</code></li>
+<li><strong>Saturação do RPS:</strong> O throughput máximo foi ~8,79 rps — praticamente idêntico ao step anterior (8,35 rps), confirmando saturação do sistema antes dos 30 utilizadores</li>
+<li><strong>Padrão de falhas:</strong> p50 desce (13 ms) enquanto p99 sobe (910 ms) — os pedidos ou respondem muito depressa (cache/erro imediato) ou ficam presos em fila, caracterizando saturação de workers e não de rede</li>
+<li><strong>Recomendação:</strong> Configurar HPA (Horizontal Pod Autoscaler) nos serviços <code>frontend</code>, <code>cartservice</code> e <code>productcatalogservice</code> para escalar a partir de ≥ 20 utilizadores</li>
+</ul>
+
+      </div>
+
+
+
+
+    <script type="module">
+// TODO: If ZenUML gets integrated into mermaid in the future,
+//      we can remove the following lines.
+
+
+var MERMAID_CONFIG = ({"startOnLoad":false});
+if (typeof MERMAID_CONFIG !== 'undefined') {
+  MERMAID_CONFIG.startOnLoad = false
+  MERMAID_CONFIG.cloneCssStyles = false
+  MERMAID_CONFIG.theme = "default"
+}
+
+mermaid.initialize(MERMAID_CONFIG || {})
+if (typeof(window['Reveal']) !== 'undefined') {
+  function mermaidRevealHelper(event) {
+    var currentSlide = event.currentSlide
+    var diagrams = currentSlide.querySelectorAll('.mermaid')
+    for (var i = 0; i < diagrams.length; i++) {
+      var diagram = diagrams[i]
+      if (!diagram.hasAttribute('data-processed')) {
+        mermaid.init(null, diagram, ()=> {
+          Reveal.slide(event.indexh, event.indexv)
+        })
+      }
+    }
+  }
+  Reveal.addEventListener('slidetransitionend', mermaidRevealHelper)
+  Reveal.addEventListener('ready', mermaidRevealHelper)
+  await mermaid.run({
+    nodes: document.querySelectorAll('.mermaid')
+  })
+} else {
+  await mermaid.run({
+    nodes: document.querySelectorAll('.mermaid')
+  })
+}
+</script>
+    
+    
+    
+  
+    </body></html>

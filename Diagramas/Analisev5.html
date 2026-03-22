@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Análise Completa — Online Boutique Microservices</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({startOnLoad:true, theme:'base', themeVariables:{fontSize:'12px'}});</script>
+  <style>
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size:15px; line-height:1.7; color:#333; background:#fff; max-width:960px; margin:0 auto; padding:2em; }
+    h1 { font-size:1.8em; font-weight:700; border-bottom:3px solid #1565C0; padding-bottom:.3em; color:#0D1B4B; margin-top:2em; }
+    h2 { font-size:1.25em; font-weight:600; color:#1565C0; margin-top:1.6em; border-left:4px solid #1565C0; padding-left:.6em; }
+    h3 { font-size:1.05em; font-weight:600; color:#283593; margin-top:1.2em; }
+    p  { margin:.6em 0 1em 0; }
+    blockquote { background:#F3F4F6; border-left:4px solid #90A4AE; padding:.7em 1.2em; margin:1em 0; border-radius:4px; color:#444; }
+    hr { border:none; border-top:2px solid #E0E0E0; margin:2.5em 0; }
+    .badge { display:inline-block; padding:.15em .55em; border-radius:3px; font-size:.8em; font-weight:600; margin:.1em; }
+    .go   { background:#00BCD4; color:#fff; }
+    .java { background:#FF7043; color:#fff; }
+    .node { background:#66BB6A; color:#fff; }
+    .py   { background:#5C6BC0; color:#fff; }
+    .cs   { background:#AB47BC; color:#fff; }
+    table { border-collapse:collapse; width:100%; margin:1em 0 1.5em 0; font-size:.92em; }
+    th { background:#1565C0; color:#fff; padding:7px 11px; text-align:left; }
+    td { border:1px solid #DDD; padding:6px 11px; vertical-align:top; }
+    tr:nth-child(even) { background:#F5F7FF; }
+    .mermaid { margin:1em 0 1.5em 0; background:#FAFAFA; border:1px solid #E0E0E0; border-radius:6px; padding:.8em; max-width:100%; overflow:auto; }
+    .toc { background:#EEF2FF; border:1px solid #C5CAE9; border-radius:6px; padding:1em 1.5em; margin-bottom:2em; }
+    .toc a { color:#3949AB; text-decoration:none; }
+    .toc a:hover { text-decoration:underline; }
+    .critical { color:#C62828; font-weight:700; }
+    .note { background:#FFF9C4; border-left:4px solid #F9A825; padding:.6em 1em; border-radius:4px; margin:1em 0; font-size:.92em; }
+    .info { background:#E3F2FD; border-left:4px solid #1565C0; padding:.6em 1em; border-radius:4px; margin:1em 0; font-size:.92em; }
+    pre { background:#F5F5F5; padding:.9em 1.1em; border-radius:4px; font-size:.88em; overflow-x:auto; margin:.5em 0 1em 0; }
+    code { background:#F0F0F0; padding:.1em .35em; border-radius:3px; font-size:.9em; }
+    .resultado-ok { background:#E8F5E9; }
+    .resultado-warn { background:#FFF3E0; }
+    .resultado-crit { background:#FFEBEE; }
+  </style>
+</head>
+<body>
+
+<h1 style="border-bottom:4px solid #1565C0; font-size:2em;">Análise Completa — Online Boutique Microservices</h1>
+<blockquote>
+  <strong>Projeto:</strong> Google Microservices Demo (Online Boutique) — aplicação de e-commerce distribuída<br>
+  <strong>Tecnologias:</strong> Go · C# · Node.js · Python · Java · Kubernetes · Docker · gRPC · Redis<br>
+  <strong>Objetivo:</strong> Análise técnica completa para trabalho prático de Arquiteturas Distribuídas
+</blockquote>
+
+<div class="toc">
+  <strong>Índice</strong>
+  <ol>
+    <li><a href="#arq">Arquitetura dos Microserviços</a></li>
+    <li><a href="#endpoints">Operações Externas e Endpoints</a></li>
+    <li><a href="#manifests">Manifestos Kubernetes</a></li>
+    <li><a href="#sequencia">Diagramas de Sequência</a></li>
+    <li><a href="#deps">Dependências entre Serviços</a></li>
+    <li><a href="#deploy">Deployment para Múltiplos Utilizadores</a></li>
+    <li><a href="#critico">Workload Crítico</a></li>
+    <li><a href="#locust">Latência e Cenários Locust</a></li>
+    <li><a href="#carga">Aumento de Carga e Latência</a></li>
+    <li><a href="#resultados">Resultados Experimentais (C1 / C2)</a></li>
+  </ol>
+</div>
+
+<hr>
+<!-- ============================================================ -->
+<h1 id="arq">1 — Arquitetura dos Microserviços</h1>
+<p>O <strong>Online Boutique</strong> é uma aplicação de e-commerce composta por <strong>12 microserviços</strong> (11 na configuração base + 1 opcional para Google Cloud), cada um desenvolvido numa linguagem diferente e com uma responsabilidade única. Esta abordagem — conhecida como arquitetura de microserviços — permite que cada componente seja desenvolvido, testado, escalado e atualizado de forma independente, sem afetar os restantes.</p>
+<p>A comunicação interna entre serviços é feita exclusivamente via <strong>gRPC</strong>, um protocolo de chamada remota de procedimentos (RPC) baseado em HTTP/2, que é mais eficiente do que REST para comunicação intra-serviço. O único ponto de entrada externo é o <strong>frontend</strong>, que expõe uma API HTTP normal para o browser do utilizador.</p>
+
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'lineColor':'#546E7A','fontSize':'12px'}}}%%
+flowchart LR
+    classDef user  fill:#BBDEFB,stroke:#1565C0,stroke-width:2px,color:#000
+    classDef fe    fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px,color:#000,font-weight:bold
+    classDef svc   fill:#E3F2FD,stroke:#1565C0,stroke-width:1px,color:#000
+    classDef db    fill:#FFF3E0,stroke:#E65100,stroke-width:1.5px,color:#000
+    classDef ext   fill:#F3E5F5,stroke:#6A1B9A,color:#000
+    U(["👤 Utilizador"]):::user
+    LG["🔄 loadgenerator\nPython/Locust"]:::ext
+    FE["🌐 frontend\nGo :8080"]:::fe
+    subgraph SVCS["Microserviços internos (gRPC)"]
+        PC["productcatalog\nGo :3550"]:::svc
+        CART["cartservice\nC# :7070"]:::svc
+        CH["checkoutservice\nGo :5050"]:::svc
+        CUR["currencyservice\nNode.js :7000"]:::svc
+        REC["recommendation\nPython :8080"]:::svc
+        SH["shippingservice\nGo :50051"]:::svc
+        AD["adservice\nJava :9555"]:::svc
+        PAY["paymentservice\nNode.js :50051"]:::svc
+        EMAIL["emailservice\nPython :5000"]:::svc
+    end
+    REDIS[("redis-cart\n:6379")]:::db
+    U -->|HTTP :80| FE
+    LG -->|HTTP| FE
+    FE -->|gRPC| PC & CART & CH & CUR & REC & SH & AD
+    CH -->|gRPC| PC & CART & CUR & SH & PAY & EMAIL
+    REC -->|gRPC| PC
+    CART -->|TCP| REDIS
+</div>
+
+<table>
+  <thead><tr><th>Serviço</th><th>Linguagem</th><th>Porta</th><th>Responsabilidade principal</th></tr></thead>
+  <tbody>
+    <tr><td>frontend</td><td><span class="badge go">Go</span></td><td>8080</td><td>Servidor HTTP, renderiza as páginas, orquestra chamadas para os outros serviços</td></tr>
+    <tr><td>productcatalogservice</td><td><span class="badge go">Go</span></td><td>3550</td><td>Lista e detalha produtos a partir de um ficheiro JSON estático</td></tr>
+    <tr><td>checkoutservice</td><td><span class="badge go">Go</span></td><td>5050</td><td>Orquestra o processo de checkout: valida carrinho, cobra pagamento, envia email</td></tr>
+    <tr><td>shippingservice</td><td><span class="badge go">Go</span></td><td>50051</td><td>Calcula custo de envio e confirma expedição (simulado)</td></tr>
+    <tr><td>cartservice</td><td><span class="badge cs">C#</span></td><td>7070</td><td>Gere o carrinho de compras persistido no Redis</td></tr>
+    <tr><td>currencyservice</td><td><span class="badge node">Node.js</span></td><td>7000</td><td>Converte preços entre moedas usando taxas do Banco Central Europeu</td></tr>
+    <tr><td>paymentservice</td><td><span class="badge node">Node.js</span></td><td>50051</td><td>Processa o pagamento com cartão de crédito (simulado)</td></tr>
+    <tr><td>emailservice</td><td><span class="badge py">Python</span></td><td>5000</td><td>Envia email de confirmação de encomenda (simulado)</td></tr>
+    <tr><td>recommendationservice</td><td><span class="badge py">Python</span></td><td>8080</td><td>Sugere produtos relacionados com base no carrinho atual</td></tr>
+    <tr><td>adservice</td><td><span class="badge java">Java</span></td><td>9555</td><td>Serve anúncios contextuais baseados nas palavras-chave da página</td></tr>
+    <tr><td>loadgenerator</td><td><span class="badge py">Python</span></td><td>—</td><td>Simula utilizadores reais com Locust para testes de carga</td></tr>
+    <tr><td>redis-cart</td><td>—</td><td>6379</td><td>Base de dados em memória para armazenar os carrinhos de compras</td></tr>
+  </tbody>
+</table>
+<hr>
+<!-- ============================================================ -->
+<h1 id="endpoints">2 — Operações Externas e Endpoints</h1>
+<p>O <strong>frontend</strong> é o único serviço com endpoints HTTP acessíveis do exterior. Todos os outros serviços são internos ao cluster e comunicam via gRPC. Do ponto de vista do utilizador (ou do load generator), existem <strong>8 endpoints HTTP</strong>.</p>
+
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+flowchart LR
+    classDef get  fill:#C8E6C9,stroke:#388E3C,color:#000
+    classDef post fill:#BBDEFB,stroke:#1976D2,color:#000
+    classDef svc  fill:#F3E5F5,stroke:#7B1FA2,color:#000
+    subgraph EXT["Endpoints HTTP (acesso externo)"]
+        G1["GET /"]:::get
+        G2["GET /product/{id}"]:::get
+        G3["GET /cart"]:::get
+        P1["POST /setCurrency"]:::post
+        P2["POST /cart"]:::post
+        P3["POST /cart/checkout"]:::post
+    end
+    subgraph INT["Serviços gRPC chamados"]
+        S1["productcatalog"]:::svc
+        S2["currency"]:::svc
+        S3["recommendation"]:::svc
+        S4["adservice"]:::svc
+        S5["cart + Redis"]:::svc
+        S7["checkout"]:::svc
+    end
+    G1 --> S1 & S2 & S3 & S4
+    G2 --> S1 & S2 & S3 & S4 & S5
+    G3 --> S5 & S2
+    P1 --> S2
+    P2 --> S1 & S5
+    P3 --> S7
+</div>
+
+<table>
+  <thead><tr><th>Endpoint</th><th>Método</th><th>O que faz</th><th>Serviços gRPC chamados</th><th>Peso Locust</th></tr></thead>
+  <tbody>
+    <tr><td>/</td><td>GET</td><td>Página inicial</td><td>productcatalog, currency, recommendation, ad</td><td>1</td></tr>
+    <tr><td>/product/{id}</td><td>GET</td><td>Página de detalhe de produto</td><td>productcatalog, currency, recommendation, ad, cart</td><td><strong>10</strong></td></tr>
+    <tr><td>/cart</td><td>GET</td><td>Ver o carrinho</td><td>cart, shipping, currency</td><td>3</td></tr>
+    <tr><td>/setCurrency</td><td>POST</td><td>Alterar moeda</td><td>currency</td><td>2</td></tr>
+    <tr><td>/cart</td><td>POST</td><td>Adicionar produto ao carrinho</td><td>productcatalog, cart</td><td>2</td></tr>
+    <tr><td>/cart/checkout</td><td>POST</td><td>Finalizar compra (orquestra 6 serviços)</td><td>checkout → cart, catalog, currency, shipping, payment, email</td><td>1</td></tr>
+  </tbody>
+</table>
+<hr>
+<!-- ============================================================ -->
+<h1 id="manifests">3 — Manifestos Kubernetes</h1>
+<p>Um <strong>manifesto Kubernetes</strong> é um ficheiro YAML que descreve o estado desejado da aplicação. Neste projeto existem <strong>12 ficheiros YAML</strong> em <code>kubernetes-manifests/</code>.</p>
+
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+sequenceDiagram
+    actor Dev as Tu
+    participant KC as kubectl
+    participant API as Kubernetes API
+    participant Node as Docker Desktop
+    Dev->>KC: kubectl apply -f kubernetes-manifests.yaml
+    KC->>API: Envia definições YAML
+    API->>API: Valida + guarda no etcd
+    API->>Node: Agenda pod no node
+    Node->>Node: docker pull imagem
+    Node->>Node: Inicia container
+    Node->>API: readinessProbe OK ✅
+    API-->>Dev: deployment created / pod Running
+</div>
+
+<table>
+  <thead><tr><th>Ficheiro YAML</th><th>Deployment</th><th>Service ClusterIP</th><th>Service LoadBalancer</th><th>ServiceAccount</th></tr></thead>
+  <tbody>
+    <tr><td>frontend.yaml</td><td>✅</td><td>✅ frontend:80</td><td>✅ localhost:80</td><td>✅</td></tr>
+    <tr><td>cartservice.yaml</td><td>✅ + ✅ redis-cart</td><td>✅ (ambos)</td><td>—</td><td>✅</td></tr>
+    <tr><td>checkoutservice.yaml</td><td>✅</td><td>✅ :5050</td><td>—</td><td>✅</td></tr>
+    <tr><td>productcatalogservice.yaml</td><td>✅</td><td>✅ :3550</td><td>—</td><td>✅</td></tr>
+    <tr><td>currencyservice.yaml</td><td>✅</td><td>✅ :7000</td><td>—</td><td>✅</td></tr>
+    <tr><td>paymentservice.yaml</td><td>✅</td><td>✅ :50051</td><td>—</td><td>✅</td></tr>
+    <tr><td>emailservice.yaml</td><td>✅</td><td>✅ :5000</td><td>—</td><td>✅</td></tr>
+    <tr><td>shippingservice.yaml</td><td>✅</td><td>✅ :50051</td><td>—</td><td>✅</td></tr>
+    <tr><td>recommendationservice.yaml</td><td>✅</td><td>✅ :8080</td><td>—</td><td>✅</td></tr>
+    <tr><td>adservice.yaml</td><td>✅</td><td>✅ :9555</td><td>—</td><td>✅</td></tr>
+    <tr><td>loadgenerator.yaml</td><td>✅</td><td>—</td><td>—</td><td>✅</td></tr>
+  </tbody>
+</table>
+<hr>
+
+<!-- ============================================================ -->
+<h1 id="sequencia">4 — Diagramas de Sequência</h1>
+
+<h2>4a — Browse de um produto (peso 10 — operação mais frequente)</h2>
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+sequenceDiagram
+    actor U as Utilizador
+    participant FE as frontend
+    participant PC as productcatalog
+    participant CUR as currency
+    participant REC as recommendation
+    participant AD as adservice
+    participant CART as cartservice
+    U->>FE: GET /product/{id}
+    FE->>PC: GetProduct(id)
+    PC-->>FE: produto + preço base
+    FE->>CUR: Convert(preço, moeda)
+    CUR-->>FE: preço convertido
+    FE->>REC: ListRecommendations(product_ids)
+    REC->>PC: GetProduct(ids sugeridos)
+    PC-->>REC: produtos
+    REC-->>FE: lista de sugestões
+    FE->>AD: GetAds(context)
+    AD-->>FE: anúncios
+    FE->>CART: GetCart(session_id)
+    CART-->>FE: itens no carrinho
+    FE-->>U: Página HTML renderizada
+</div>
+
+<h2>4b — Checkout (operação mais complexa — 6 serviços em cadeia)</h2>
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+sequenceDiagram
+    actor U as Utilizador
+    participant FE as frontend
+    participant CH as checkoutservice
+    participant CART as cartservice
+    participant PC as productcatalog
+    participant CUR as currency
+    participant SH as shipping
+    participant PAY as payment
+    participant EMAIL as email
+    U->>FE: POST /cart/checkout
+    FE->>CH: PlaceOrder(user, address, card)
+    CH->>CART: GetCart(user_id)
+    CART-->>CH: itens[]
+    CH->>PC: GetProduct(item_ids)
+    PC-->>CH: preços
+    CH->>CUR: Convert(preços)
+    CUR-->>CH: preços convertidos
+    CH->>SH: GetQuote(address, itens)
+    SH-->>CH: custo envio
+    CH->>SH: ShipOrder(address)
+    SH-->>CH: tracking_id
+    CH->>PAY: Charge(card, total)
+    PAY-->>CH: transaction_id
+    CH->>CART: EmptyCart(user_id)
+    CH->>EMAIL: SendConfirmation(email, order)
+    EMAIL-->>CH: OK
+    CH-->>FE: order_id + tracking_id
+    FE-->>U: Página de confirmação
+</div>
+
+<h2>4c — Adicionar ao carrinho</h2>
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+sequenceDiagram
+    actor U as Utilizador
+    participant FE as frontend
+    participant PC as productcatalog
+    participant CART as cartservice
+    participant R as redis-cart
+    U->>FE: POST /cart {product_id, qty}
+    FE->>PC: GetProduct(product_id)
+    PC-->>FE: produto válido
+    FE->>CART: AddItem(session_id, product_id, qty)
+    CART->>R: HSET cart:{session_id}
+    R-->>CART: OK
+    CART-->>FE: OK
+    FE-->>U: Redirect → /cart
+</div>
+<hr>
+
+<!-- ============================================================ -->
+<h1 id="deps">5 — Dependências entre Serviços</h1>
+<p>Conhecer as dependências é essencial para perceber o impacto de uma falha. Se o <em>productcatalogservice</em> falhar, afeta o frontend, o checkoutservice e o recommendationservice simultaneamente.</p>
+
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+flowchart LR
+    classDef fe   fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px,color:#000,font-weight:bold
+    classDef hub  fill:#FFCDD2,stroke:#C62828,stroke-width:2px,color:#000
+    classDef svc  fill:#E3F2FD,stroke:#1565C0,color:#000
+    classDef leaf fill:#F1F8E9,stroke:#558B2F,color:#000
+    classDef db   fill:#FFF3E0,stroke:#E65100,color:#000
+    classDef ext  fill:#EDE7F6,stroke:#4527A0,color:#000
+    LG["loadgenerator"]:::ext
+    FE["frontend\n(depende de 8)"]:::fe
+    CH["checkoutservice\n(depende de 6)"]:::hub
+    PC["productcatalog"]:::svc
+    CART["cartservice"]:::svc
+    CUR["currencyservice"]:::svc
+    REC["recommendation"]:::svc
+    SH["shippingservice"]:::leaf
+    PAY["paymentservice"]:::leaf
+    EMAIL["emailservice"]:::leaf
+    AD["adservice"]:::leaf
+    REDIS[("redis-cart")]:::db
+    LG -->|HTTP| FE
+    FE --> PC & CART & CH & CUR & REC & SH & AD
+    CH --> PC & CART & CUR & SH & PAY & EMAIL
+    REC --> PC
+    CART --> REDIS
+</div>
+
+<table>
+  <thead><tr><th>Serviço</th><th>Depende de</th><th>Chamado por</th><th>Risco de falha</th></tr></thead>
+  <tbody>
+    <tr><td>productcatalogservice</td><td>Nenhum</td><td>frontend, checkout, recommendation</td><td>🔴 Alto — afeta 3 serviços</td></tr>
+    <tr><td>cartservice + Redis</td><td>redis-cart</td><td>frontend, checkout</td><td>🔴 Alto — bloqueia compras</td></tr>
+    <tr><td>currencyservice</td><td>ECB API (externo)</td><td>frontend, checkout</td><td>🟠 Médio</td></tr>
+    <tr><td>checkoutservice</td><td>6 serviços</td><td>frontend</td><td>🟠 Médio — ponto de orquestração</td></tr>
+    <tr><td>shippingservice</td><td>Nenhum</td><td>frontend, checkout</td><td>🟢 Baixo</td></tr>
+    <tr><td>paymentservice</td><td>Nenhum</td><td>checkout</td><td>🟢 Baixo</td></tr>
+    <tr><td>emailservice</td><td>Nenhum</td><td>checkout</td><td>🟢 Baixo (não bloqueia checkout)</td></tr>
+    <tr><td>adservice</td><td>Nenhum</td><td>frontend</td><td>🟢 Baixo (degradação suave)</td></tr>
+  </tbody>
+</table>
+<hr>
+
+<!-- ============================================================ -->
+<h1 id="deploy">6 — Deployment para Múltiplos Utilizadores</h1>
+<p>Com Kubernetes, escalar para mais utilizadores é uma questão de <strong>aumentar o número de réplicas</strong> de um serviço. A estratégia inteligente é escalar primeiro os serviços que são bottleneck, não todos ao mesmo tempo.</p>
+
+<table>
+  <thead><tr><th>Estratégia</th><th>Comando</th><th>Quando usar</th></tr></thead>
+  <tbody>
+    <tr><td>Escalar réplicas manualmente</td><td><code>kubectl scale deployment frontend --replicas=3</code></td><td>Sabes antecipadamente a carga esperada</td></tr>
+    <tr><td>HPA automático por CPU</td><td><code>kubectl autoscale deployment frontend --cpu-percent=50 --min=1 --max=5</code></td><td>Carga variável e imprevisível</td></tr>
+    <tr><td>Escalar serviço crítico</td><td><code>kubectl scale deployment productcatalogservice --replicas=3</code></td><td>Quando identificas o bottleneck</td></tr>
+    <tr><td>Aumentar limites de recursos</td><td>Editar YAML: <code>cpu.limits: 500m</code></td><td>Pod usa CPU máxima mas não há mais pods a lançar</td></tr>
+  </tbody>
+</table>
+<hr>
+
+<!-- ============================================================ -->
+<h1 id="critico">7 — Workload Crítico</h1>
+<p>O <em>browseProduct</em> tem peso 10 — é executado 10 vezes mais do que o checkout. O <em>productcatalogservice</em> é chamado em quase todas as operações e não tem cache — <strong>é o maior bottleneck potencial</strong>.</p>
+
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+flowchart LR
+    classDef hot  fill:#FFCDD2,stroke:#C62828,stroke-width:2px,color:#000,font-weight:bold
+    classDef warm fill:#FFF9C4,stroke:#F9A825,color:#000
+    classDef cold fill:#E8F5E9,stroke:#388E3C,color:#000
+    subgraph OP["Operações por frequência"]
+        O1["browseProduct  peso 10🔥"]:::hot
+        O2["viewCart  peso 3"]:::warm
+        O3["setCurrency  peso 2"]:::warm
+        O4["addToCart  peso 2"]:::warm
+        O5["index  peso 1"]:::cold
+        O6["checkout  peso 1"]:::cold
+    end
+    subgraph SVC["Serviços sob pressão"]
+        S1["productcatalog 🔴 crítico"]:::hot
+        S2["currencyservice 🔴 crítico"]:::hot
+        S3["cartservice+Redis 🔴 crítico"]:::hot
+        S4["recommendation 🟠"]:::warm
+        S5["adservice 🟠"]:::warm
+        S6["checkoutservice 🟢"]:::cold
+    end
+    O1 --> S1 & S2 & S4 & S5
+    O2 --> S3 & S2
+    O3 --> S2
+    O4 --> S1 & S3
+    O6 --> S6
+</div>
+
+<div class="note">
+  <strong>Bottlenecks por ordem de prioridade:</strong><br>
+  1. <span class="critical">productcatalogservice</span> — chamado em browse (×10), addToCart (×2), index, checkout. Sem cache. Escalar primeiro.<br>
+  2. <span class="critical">currencyservice</span> — chamado em browse, viewCart, checkout. Faz chamada HTTP externa ao BCE em cada pedido.<br>
+  3. <span class="critical">cartservice + redis-cart</span> — Redis é single-threaded. Com muitos users simultâneos, as operações ficam em fila.<br>
+  4. <span class="critical">checkoutservice</span> — Chama 6 serviços em sequência. Latência total = soma das latências individuais.
+</div>
+<hr>
+
+<!-- ============================================================ -->
+<h1 id="locust">8 — Latência e Cenários Locust</h1>
+<p>O <strong>Locust</strong> é a ferramenta de load testing já incluída no projeto. Simula utilizadores reais com tempos de espera aleatórios entre operações.</p>
+
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+flowchart LR
+    classDef user fill:#C8E6C9,stroke:#388E3C,color:#000,font-weight:bold
+    classDef task fill:#E3F2FD,stroke:#1565C0,color:#000
+    classDef freq fill:#FFCDD2,stroke:#C62828,color:#000
+    WU["WebsiteUser\nwait: 1–10s"]:::user
+    T1["index /\npeso 1"]:::task
+    T2["setCurrency\npeso 2"]:::task
+    T3["browseProduct\npeso 10 🔥"]:::freq
+    T4["addToCart\npeso 2"]:::task
+    T5["viewCart\npeso 3"]:::task
+    T6["checkout\npeso 1"]:::task
+    WU --> T1 & T2 & T3 & T4 & T5 & T6
+</div>
+<hr>
+
+<!-- ============================================================ -->
+<h1 id="carga">9 — Aumento de Carga e Evolução da Latência</h1>
+<p>A estratégia correta para load testing é <strong>progressiva</strong>: começas com poucos utilizadores para estabelecer a baseline e vais aumentando, observando como a latência evolui.</p>
+
+<div class="mermaid">%%{init:{'theme':'base','themeVariables':{'fontSize':'12px'}}}%%
+flowchart LR
+    classDef fase fill:#E3F2FD,stroke:#1565C0,stroke-width:2px,color:#000,font-weight:bold
+    classDef ok   fill:#C8E6C9,stroke:#388E3C,color:#000
+    classDef warn fill:#FFF9C4,stroke:#F9A825,color:#000
+    classDef crit fill:#FFCDD2,stroke:#C62828,color:#000
+    F1["Fase 1\n5 users\nBaseline"]:::fase
+    F2["Fase 2\n25 users"]:::fase
+    F3["Fase 3\n100 users"]:::fase
+    F4["Fase 4\n250 users\nStress"]:::fase
+    R1["✅ p99 &lt; 200ms\nSistema estável"]:::ok
+    R2["⚠️ p99 ~400ms\nProductCatalog lento"]:::warn
+    R3["⚠️ p99 ~1–2s\nRedis em fila"]:::warn
+    R4["❌ Timeouts\nCheckout a falhar"]:::crit
+    F1 --> R1 --> F2
+    F2 --> R2 --> F3
+    F3 --> R3 --> F4
+    F4 --> R4
+</div>
+
+<table>
+  <thead><tr><th>Fase</th><th>Utilizadores</th><th>Duração</th><th>O que observar</th><th>Ação recomendada</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Baseline</strong></td><td>5</td><td>2 min</td><td>Latência base de cada endpoint</td><td>Anotar valores de referência (p50, p99)</td></tr>
+    <tr><td><strong>Normal</strong></td><td>25</td><td>5 min</td><td>Como evoluem p50 e p99?</td><td>Comparar com baseline. Identificar desvios.</td></tr>
+    <tr><td><strong>Alto</strong></td><td>100</td><td>5 min</td><td>Qual serviço degrada primeiro?</td><td>Escalar o serviço que usa mais CPU</td></tr>
+    <tr><td><strong>Stress</strong></td><td>250</td><td>5 min</td><td>Erros 5xx, pod restarts, timeouts</td><td>HPA ou aumentar limites de CPU/RAM</td></tr>
+  </tbody>
+</table>
+<hr>
+<!-- ============================================================ -->
+<h1 id="resultados">10 — Resultados Experimentais (C1 / C2)</h1>
+
+<p>
+  Esta secção apresenta os resultados dos cenários de teste executados localmente em Docker Desktop
+  (Apple Silicon, Mac M-series). Os cenários seguem a metodologia de escalabilidade horizontal do Tema 2:
+  baseline com 1 réplica por serviço (C1) e escalamento seletivo do bottleneck principal (C2).
+</p>
+
+<div class="info">
+  <strong>Ambiente:</strong> Docker Desktop (Kubernetes local) · macOS Apple Silicon ·
+  Namespace: <code>default</code> · 3 perfis Locust (Casual/Normal/PowerUser) ·
+  Spawn rate: 2 users/s · Step: 5 users · Step duration: 60s · Cooldown: 15s ·
+  Critérios de quebra: p99 &gt; 2000ms ou falhas &gt; 5%
+</div>
+
+<h2>Cenário C1 — Baseline (1 réplica por serviço)</h2>
+
+<p>
+  O C1 é o cenário de referência. Todos os serviços correm com <strong>1 réplica</strong> — configuração padrão do Online Boutique.
+  O objetivo é identificar o ponto de saturação e confirmar qual serviço colapsa primeiro.
+  A distribuição de utilizadores simula comportamento realista:
+  30% Casual (wait 5–15s), 50% Normal (wait 2–6s), 20% PowerUser (wait 0.5–2s).
+  O checkout usa <code>catch_response</code> para não contaminar métricas quando o add-to-cart falha.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Users</th>
+      <th>p50 (ms)</th>
+      <th>p90 (ms)</th>
+      <th>p99 (ms)</th>
+      <th>Falhas</th>
+      <th>Falhas (%)</th>
+      <th>RPS</th>
+      <th>Estado</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="resultado-ok"><td>5</td><td>25</td><td>36</td><td>130</td><td>0</td><td>0.0%</td><td>1.71</td><td>✅ OK</td></tr>
+    <tr class="resultado-ok"><td>10</td><td>21</td><td>36</td><td>77</td><td>0</td><td>0.0%</td><td>3.41</td><td>✅ OK</td></tr>
+    <tr class="resultado-ok"><td>15</td><td>22</td><td>35</td><td>120</td><td>0</td><td>0.0%</td><td>4.98</td><td>✅ OK</td></tr>
+    <tr class="resultado-warn"><td>20</td><td>26</td><td>120</td><td>410</td><td>0</td><td>0.0%</td><td>6.60</td><td>⚠️ p99 a subir</td></tr>
+    <tr class="resultado-warn"><td>25</td><td>21</td><td>65</td><td>420</td><td>0</td><td>0.0%</td><td>8.35</td><td>⚠️ p99 elevado</td></tr>
+    <tr class="resultado-crit"><td><strong>30</strong></td><td>13</td><td>210</td><td>910</td><td>247</td><td>47.6%</td><td>8.79</td><td>❌ QUEBRA</td></tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>Ponto de quebra: 30 utilizadores</strong> — o sistema colapsa com 47.6% de falhas e p99=910ms.
+  A degradação começa a 20 users (p90 sobe de 36ms para 120ms) e é progressiva até 30 users.
+  O throughput máximo atingido antes do colapso foi <strong>8.79 RPS</strong>.
+  A degradação do p90 a 20 users indica saturação progressiva do productcatalogservice
+  (chamado 6+ vezes por request no workflow de browse, sem cache).
+</div>
+
+<h2>Traces Jaeger validados (sem carga)</h2>
+
+<p>
+  Os seguintes traces foram recolhidos manualmente com 1 utilizador, antes dos testes de carga,
+  para validar as dependências e latências de referência:
+</p>
+
+<table>
+  <thead><tr><th>Workflow</th><th>Trace ID</th><th>Duração total</th><th>Spans</th><th>Serviços envolvidos</th></tr></thead>
+  <tbody>
+    <tr><td><strong>W1</strong> — Browse Product</td><td>683956a</td><td>26ms</td><td>múltiplos</td><td>frontend, productcatalog (×6+), currency, recommendation, adservice, cart</td></tr>
+    <tr><td><strong>W2</strong> — Add to Cart</td><td>53b3ee2</td><td>1.53ms</td><td>4</td><td>frontend, productcatalog (208µs), cartservice (1.18ms)</td></tr>
+    <tr><td><strong>W3</strong> — Checkout</td><td>3fbd639</td><td>58.3ms</td><td>múltiplos</td><td>frontend, checkoutservice (52ms), cart, productcatalog, currency, shipping, payment, email</td></tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>Correções face à análise estática:</strong>
+  W1 tem 6 chamadas gRPC ao productcatalog (não 5) — inclui GetSupportedCurrencies.
+  W3/Convert é condicional (só ativa com moeda ≠ USD).
+  PaymentService demora 2.64ms — span dominante da cadeia checkout.
+</div>
+
+<h2>Bottlenecks identificados experimentalmente</h2>
+
+<table>
+  <thead><tr><th>Serviço</th><th>Tipo</th><th>Evidência</th><th>Latência Jaeger (sem carga)</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>productcatalogservice</strong> (Bottleneck #1)</td>
+      <td>Stateless</td>
+      <td>Chamado 6+ vezes por request no W1 (peso 10). Sem cache. Lê ficheiro JSON em memória. Fan-out amplifica carga sob concorrência. p90 sobe de 36ms→120ms entre 15 e 20 users.</td>
+      <td>857µs (GetProduct frontend→service), 26µs (interno)</td>
+    </tr>
+    <tr>
+      <td><strong>cartservice / Redis</strong></td>
+      <td>Stateful</td>
+      <td>Redis single-threaded. Operações HSET/HGET serializadas. Escalar réplicas C# não resolve — gargalo é o Redis. Falha em cascata confirmada: add-to-cart falha → checkout falha 100% (422).</td>
+      <td>2.45ms (GetCart), 1.18ms (AddItem — span dominante W2)</td>
+    </tr>
+    <tr>
+      <td><strong>currencyservice</strong></td>
+      <td>Stateless</td>
+      <td>Dependência HTTP externa (BCE). Latência variável. Chamado em W1, W2 e W3.</td>
+      <td>5.73ms (GetSupportedCurrencies), 5.99ms (Convert)</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2>Cenário C2 — Escalamento Seletivo (productcatalogservice ×3)</h2>
+
+<p>
+  O C2 testa a hipótese H1: escalar o bottleneck principal desloca o ponto de saturação para mais utilizadores
+  e reduz o p99. A única diferença face ao C1 é que o <strong>productcatalogservice é escalado para 3 réplicas</strong>
+  antes do início dos testes — todos os outros serviços mantêm 1 réplica.
+</p>
+
+<pre>
+# Preparação C2
+kubectl scale deployment productcatalogservice --replicas=3 -n default
+kubectl rollout status deployment/productcatalogservice -n default
+
+# Executar (mesmo script do C1)
+NAMESPACE=default ./c2.sh incremental
+
+# Repor após o teste
+kubectl scale deployment productcatalogservice --replicas=1 -n default
+</pre>
+
+<h2>Hipóteses a validar com C2</h2>
+
+<table>
+  <thead><tr><th>ID</th><th>Hipótese</th><th>Métrica de validação</th><th>Resultado esperado</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>H1</strong></td>
+      <td>Escalar productcatalogservice para 3 réplicas desloca o ponto de saturação e reduz o p99 em &gt;40%</td>
+      <td>Ponto de quebra C2 vs C1; p99 a 25 users</td>
+      <td>Quebra C2 &gt; 30 users; p99(25u) &lt; 252ms</td>
+    </tr>
+    <tr>
+      <td><strong>H2</strong></td>
+      <td>Escalamento seletivo tem CM superior ao uniforme (C3)</td>
+      <td>CM = ΔRPS / ΔRéplicas; comparar CM(C2) vs CM(C3)</td>
+      <td>CM(C2) &gt; CM(C3)</td>
+    </tr>
+    <tr>
+      <td><strong>H3</strong></td>
+      <td>Após escalar productcatalogservice, cartservice/Redis emerge como novo bottleneck</td>
+      <td>p99 de /cart [add] e GetCart cresce desproporcionalmente em C2</td>
+      <td>p99 cart &gt; p99 productcatalog em C2</td>
+    </tr>
+    <tr>
+      <td><strong>H5</strong></td>
+      <td>gRPC sobre HTTP/2 limita a eficácia do load balancing horizontal</td>
+      <td>Desvio padrão de CPU entre 3 réplicas do productcatalogservice</td>
+      <td>Desvio &gt;20% entre réplicas</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Resultados do C2</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Users</th>
+      <th>p50 (ms)</th>
+      <th>p90 (ms)</th>
+      <th>p99 (ms)</th>
+      <th>Falhas</th>
+      <th>Falhas (%)</th>
+      <th>RPS</th>
+      <th>Estado</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="resultado-ok"><td>5</td><td>28</td><td>53</td><td>140</td><td>0</td><td>0.0%</td><td>1.62</td><td>✅ OK</td></tr>
+    <tr class="resultado-ok"><td>10</td><td>28</td><td>84</td><td>350</td><td>0</td><td>0.0%</td><td>3.21</td><td>✅ OK</td></tr>
+    <tr class="resultado-warn"><td>15</td><td>25</td><td>83</td><td>830</td><td>0</td><td>0.0%</td><td>4.98</td><td>⚠️ p99 elevado</td></tr>
+    <tr class="resultado-warn"><td>20</td><td>24</td><td>93</td><td>1000</td><td>0</td><td>0.0%</td><td>6.23</td><td>⚠️ p99 crítico</td></tr>
+    <tr class="resultado-warn"><td>25</td><td>23</td><td>88</td><td>830</td><td>0</td><td>0.0%</td><td>7.94</td><td>⚠️ p99 elevado</td></tr>
+    <tr class="resultado-crit"><td><strong>30</strong></td><td>25</td><td>140</td><td>940</td><td>81</td><td>14.8%</td><td>9.29</td><td>❌ QUEBRA</td></tr>
+  </tbody>
+</table>
+
+<h2>Tabela comparativa C1 vs C2</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Métrica</th>
+      <th>C1 (baseline, 1 réplica)</th>
+      <th>C2 (seletivo, 3 réplicas)</th>
+      <th>Δ</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Réplicas productcatalogservice</td><td>1</td><td>3</td><td>+2</td></tr>
+    <tr><td>Ponto de quebra (users)</td><td>30</td><td>30</td><td>= (sem melhoria)</td></tr>
+    <tr><td>RPS máximo antes da quebra</td><td>8.79</td><td>9.29</td><td>+0.50 RPS</td></tr>
+    <tr><td>p99 a 25 users (ms)</td><td>420</td><td>830</td><td>+410ms ⚠️ piorou</td></tr>
+    <tr><td>p99 a 20 users (ms)</td><td>410</td><td>1000</td><td>+590ms ⚠️ piorou</td></tr>
+    <tr><td>p90 a 30 users (ms)</td><td>210</td><td>140</td><td>−70ms (melhorou)</td></tr>
+    <tr><td>Falhas no ponto de quebra</td><td>47.6%</td><td>14.8%</td><td>−32.8% (melhorou)</td></tr>
+    <tr><td><strong>CM = ΔRPS / ΔRéplicas</strong></td><td>—</td><td colspan="2"><strong>(9.29 − 8.79) / 2 = 0.25 RPS/réplica</strong></td></tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>Análise dos resultados C1 vs C2:</strong><br><br>
+  O C2 apresenta resultados <strong>mistos</strong> — o ponto de quebra manteve-se nos 30 utilizadores mas o comportamento é diferente.
+  O p99 a 20–25 users <em>piorou</em> significativamente (410ms→1000ms), sugerindo que escalar o productcatalogservice
+  introduziu instabilidade no load balancing gRPC — consistent com a <strong>H5</strong> (HTTP/2 connection affinity).
+  Por outro lado, o RPS máximo aumentou ligeiramente (+0.50) e as falhas no ponto de quebra reduziram de 47.6% para 14.8%.<br><br>
+  Este resultado apoia parcialmente <strong>H3</strong>: com o productcatalogservice escalado,
+  o cartservice/Redis emerge como bottleneck dominante (evidenciado pelo p99 elevado a partir de 15 users —
+  operações Redis começam a serializar). Escalar réplicas C# não resolve porque o gargalo é o Redis single-threaded.<br><br>
+  <strong>CM = 0.25 RPS/réplica</strong> — ganho marginal baixo. Para validar H2, é necessário correr C3
+  (todos os serviços ×3) e comparar CM(C3) com CM(C2) = 0.25.
+</div>
+
+<div class="info">
+  <strong>Definição operacional de Custo Marginal (CM):</strong><br>
+  CM = ΔRPS / ΔRéplicas, onde ΔRPS é a variação de throughput entre C1 e C2,
+  e ΔRéplicas é o número de réplicas adicionadas (2 réplicas do productcatalogservice).
+  Um CM decrescente entre cenários indica rendimentos marginais decrescentes.<br><br>
+  <strong>Proxy de custo local:</strong> CustoLocal = Σ(CPU_pod × duração) + Σ(MEM_pod × duração),
+  medido via <code>kubectl top pods</code> durante os testes.
+</div>
+
+<hr>
+<p style="color:#999;font-size:.85em;text-align:center;">Análise gerada para trabalho prático — Arquiteturas de Sistemas de Informação Distribuídos · 2026 · v5.0</p>
+</body>
+</html>
